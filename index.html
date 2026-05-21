@@ -1,358 +1,908 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>KARAOKE MANAGER PRO - PLAYER-V2.0-26-018-FIXED</title>
-    <style>
-        :root { --accent: #3df576; --bg: #050505; --panel: #111; --danger: #ff4757; --info: #2980b9; --highlight: rgba(255, 255, 150, 0.4); }
-        body { background: var(--bg); color: #e0e0e0; font-family: 'Segoe UI', sans-serif; margin: 15px; font-size: 11px; }
-        
-        .main-title { text-align: center; color: var(--accent); font-size: 28px; font-weight: bold; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 2px; }
-
-        input, select, [contenteditable="true"] { text-transform: uppercase !important; font-weight: bold; font-size: 13px !important; }
-
-        .setup-bar { background: #0f0f0f; padding: 12px; border-radius: 12px; border: 1px solid #222; margin-bottom: 10px; display: flex; align-items: center; gap: 15px; }
-        .header-input { flex-grow: 1; color: var(--accent); background: #000; border: 1px solid #333; padding: 8px; border-radius: 6px; }
-
-        .timing-dashboard { flex: 3; background: #000; padding: 8px 12px; border-radius: 8px; border: 1px solid #333; display: flex; align-items: center; gap: 15px; justify-content: space-between; }
-        .time-stat { text-align: center; padding: 0 5px; border-right: 1px solid #222; }
-        .time-stat:last-of-type { border-right: none; }
-        .time-stat label { font-size: 8px; color: #777; display: block; margin-bottom: 2px; font-weight: bold; }
-        .time-stat span { color: var(--accent); }
-        .digital-clock { font-family: 'Courier New', monospace; font-size: 24px !important; color: var(--danger); text-shadow: 0 0 5px var(--danger); min-width: 120px; }
-
-        .btn-stack { display: flex; flex-direction: column; gap: 2px; min-width: 90px; }
-        .timer-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
-
-        .input-group { background: var(--panel); padding: 12px; border-radius: 10px; border: 1px solid #333; display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 8px; margin-bottom: 10px; align-items: end; }
-        .control-block { display: flex; flex-direction: column; gap: 4px; }
-        label { font-size: 9px; color: #777; font-weight: bold; text-transform: uppercase; }
-
-        .table-container { width: 100%; overflow-x: auto; background: var(--panel); border-radius: 8px; border: 1px solid #222; }
-        table { width: 100%; border-collapse: collapse; min-width: 1450px; table-layout: fixed; }
-        th, td { padding: 6px; border: 1px solid #282828; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; }
-        th { background: #1a1a1a; color: var(--accent); font-size: 9px; text-transform: uppercase; }
-
-        .w-id { width: 25px; } .w-name { width: 130px; } .w-song { width: 150px; } .w-sel { width: 100px; } 
-        .w-stat { width: 80px; } .w-file { width: 260px; } .w-ord { width: 60px; } .w-act { width: 140px; } .w-time { width: 70px; }
-
-        /* Modified Highlight to light yellow with opacity */
-        .row-moving { background-color: var(--highlight) !important; transition: background-color 0.2s; cursor: move; }
-
-        .btn { padding: 4px 8px; cursor: pointer; background: #222; color: #fff; border: 1px solid #444; border-radius: 4px; font-weight: bold; font-size: 9px; }
-        .btn-add { background: var(--accent); color: #000; border: none; height: 35px; }
-        .btn-attach { background: #444; color: #fff; border: 1px dashed var(--accent); height: 35px; }
-        .btn-duplicate { background: #ffc107; color: #000; border: none; }
-        .toggle-btn { border: none; padding: 3px; border-radius: 4px; font-weight: bold; cursor: pointer; width: 100%; font-size: 9px; }
-        
-        .status-pending { background: #e6b800; color: #000; }
-        .status-sung { background: var(--accent); color: #000; }
-        .presence-present { background: var(--info); color: #fff; }
-        .presence-absent { background: var(--danger); color: #fff; }
-
-        .counter-container { margin: 5px 0; padding: 8px; background: #111; border-radius: 6px; display: flex; gap: 20px; align-items: center; }
-        .counter-container b { color: var(--accent); font-size: 14px; }
-        
-        .file-cell-wrap { display: flex; align-items: center; justify-content: space-between; gap: 5px; }
-        .file-name-text { font-size: 9px; color: var(--accent); font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; }
-    </style>
+<html lang="en"><head>
+<meta charset="UTF-8">
+<title>KARAOKE MANAGER PRO - PLAYER-V2.0-26-025-V13</title>
+<style>
+:root{--accent:#3df576;--bg:#050505;--panel:#111;--danger:#ff4757;--info:#2980b9;--warn:#ffc107;--highlight:rgba(255,255,150,0.4);}
+*{box-sizing:border-box;}
+body{background:var(--bg);color:#e0e0e0;font-family:'Segoe UI',sans-serif;margin:15px;font-size:11px;}
+.main-title{text-align:center;color:var(--accent);font-size:26px;font-weight:bold;margin-bottom:12px;text-transform:uppercase;letter-spacing:2px;}
+input,select,[contenteditable="true"]{text-transform:uppercase!important;font-weight:bold;font-size:11px!important;}
+/* ── Setup bar ── */
+.setup-bar{background:#0f0f0f;padding:10px 12px;border-radius:12px;border:1px solid #222;margin-bottom:10px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.header-input{flex-grow:1;color:var(--accent);background:#000;border:1px solid #333;padding:7px;border-radius:6px;}
+.timing-dashboard{flex:3;min-width:500px;background:#000;padding:7px 10px;border-radius:8px;border:1px solid #333;display:flex;align-items:center;gap:10px;justify-content:space-between;}
+.time-stat{text-align:center;padding:0 4px;border-right:1px solid #222;}
+.time-stat:last-of-type{border-right:none;}
+.time-stat label{font-size:8px;color:#777;display:block;margin-bottom:2px;font-weight:bold;}
+.time-stat span{color:var(--accent);}
+.digital-clock{font-family:'Courier New',monospace;font-size:22px!important;color:var(--danger);text-shadow:0 0 5px var(--danger);min-width:110px;}
+.btn-stack{display:flex;flex-direction:column;gap:2px;min-width:85px;}
+.timer-controls{display:grid;grid-template-columns:1fr 1fr;gap:2px;}
+/* ── Add form ── */
+.input-group{background:var(--panel);padding:10px 12px;border-radius:10px;border:1px solid #333;display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px;align-items:flex-end;}
+.control-block{display:flex;flex-direction:column;gap:3px;min-width:90px;}
+.control-block.wide{min-width:140px;flex:1;}
+label{font-size:8px;color:#777;font-weight:bold;text-transform:uppercase;}
+#duetPartnerBlock{display:none;}
+/* ── Buttons ── */
+.btn{padding:4px 7px;cursor:pointer;background:#222;color:#fff;border:1px solid #444;border-radius:4px;font-weight:bold;font-size:9px;white-space:nowrap;}
+.btn-add{background:var(--accent);color:#000;border:none;height:34px;min-width:90px;}
+.btn-attach{background:#444;color:#fff;border:1px dashed var(--accent);height:34px;}
+.btn-duplicate{background:var(--warn);color:#000;border:none;}
+.toggle-btn{border:none;padding:3px 2px;border-radius:4px;font-weight:bold;cursor:pointer;width:100%;font-size:9px;}
+.status-pending{background:#e6b800;color:#000;}
+.status-sung{background:var(--accent);color:#000;}
+.presence-present{background:var(--info);color:#fff;}
+.presence-absent{background:var(--danger);color:#fff;}
+/* ── Counter bar ── */
+.counter-container{margin:5px 0;padding:7px 10px;background:#111;border-radius:6px;display:flex;gap:16px;align-items:center;flex-wrap:wrap;}
+.counter-container b{color:var(--accent);font-size:13px;}
+/* ── Table ── */
+.table-container{width:100%;overflow-x:auto;background:var(--panel);border-radius:8px;border:1px solid #222;}
+table{width:100%;border-collapse:collapse;min-width:1380px;table-layout:fixed;}
+th,td{padding:5px 4px;border:1px solid #282828;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:middle;}
+th{background:#1a1a1a;color:var(--accent);font-size:8px;text-transform:uppercase;}
+/* column widths */
+.w-id  {width:22px;}
+.w-name{width:115px;}
+.w-song{width:140px;}
+.w-type{width:130px;}
+.w-stat{width:72px;}
+.w-pres{width:68px;}
+.w-play{width:80px;}
+.w-fmt {width:65px;}
+.w-file{width:230px;}
+.w-min {width:38px;}  /* narrowed MINS */
+.w-ord {width:48px;}
+.w-act {width:130px;}
+/* ── Row highlight ── */
+.row-moving{background-color:var(--highlight)!important;cursor:move;}
+/* ── Violation: singer name red ── */
+.singer-ok  {color:#e0e0e0;}
+.singer-warn{color:var(--danger)!important;text-shadow:0 0 6px rgba(255,71,87,.65);font-weight:bold!important;}
+/* ── Edit mode ── */
+.editing-row{background:#0d1f0d!important;outline:1px solid var(--accent);}
+.btn-edit{background:#333;color:var(--warn);}
+.btn-save{background:var(--accent);color:#000;}
+/* ── File cell ── */
+.file-cell-wrap{display:flex;align-items:center;gap:4px;}
+.file-name-text{font-size:8px;color:var(--accent);font-weight:bold;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;}
+/* ── Toast ── */
+#toastBox{display:none;position:fixed;top:18px;left:50%;transform:translateX(-50%);background:var(--danger);color:#fff;padding:11px 26px;border-radius:8px;font-weight:bold;font-size:12px;z-index:9999;box-shadow:0 4px 20px rgba(255,71,87,.7);max-width:90vw;text-align:center;}
+@keyframes toastIn {from{opacity:0;top:4px}to{opacity:1;top:18px}}
+@keyframes toastOut{from{opacity:1;top:18px}to{opacity:0;top:4px}}
+/* ── Player popup ── */
+#playerModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:10000;align-items:center;justify-content:center;}
+#playerModal.open{display:flex;}
+#playerBox{background:#0a0a0a;border:3px solid var(--accent);border-radius:14px;padding:20px;width:min(560px,96vw);display:flex;flex-direction:column;gap:12px;}
+#playerBox h2{color:var(--accent);margin:0;font-size:16px;text-align:center;}
+#playerBox p{color:#ccc;margin:0;text-align:center;font-size:12px;}
+#playerMediaWrap{width:100%;}
+#playerMediaWrap audio,#playerMediaWrap video{width:100%;border-radius:8px;}
+.player-controls{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.ctrl-row{display:flex;flex-direction:column;gap:4px;}
+.ctrl-row label{font-size:9px;color:#999;font-weight:bold;}
+.ctrl-row .ctrl-wrap{display:flex;align-items:center;gap:8px;}
+.ctrl-row input[type=range]{flex:1;accent-color:var(--accent);}
+.ctrl-row span{font-size:10px;color:var(--accent);min-width:38px;text-align:right;font-weight:bold;}
+.player-btns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;}
+.pbtn{padding:7px 18px;border:none;border-radius:6px;font-weight:bold;font-size:11px;cursor:pointer;}
+/* ── JSONBin badge ── */
+#syncStatus{font-size:9px;padding:3px 7px;border-radius:4px;font-weight:bold;}
+.sync-ok   {background:#1a3a1a;color:var(--accent);border:1px solid #2a6a2a;}
+.sync-err  {background:#3a1a1a;color:var(--danger);border:1px solid #6a2a2a;}
+.sync-busy {background:#1a1a3a;color:var(--info);border:1px solid #2a3a6a;}
+/* GitHub Pages multi-user panel */
+#cloudPanel{background:#0f0f0f;border:1px solid #2a3a2a;border-radius:8px;padding:8px 12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px;}
+</style>
 </head>
 <body onload="initApp()">
 
-    <div class="main-title">SINGING SHOW MANAGER</div>
+<!-- Toast -->
+<div id="toastBox" style="background: var(--danger); display: none; animation: 0.4s ease 0s 1 normal forwards running toastOut;">"AJI" has 3 solo songs (max 2).</div>
 
-    <div class="setup-bar">
-        <div class="name-area" style="flex:2; display:flex; gap:10px; align-items: center;">
-            <input type="text" id="programName" class="header-input" value="KARAOKE_MASTER_EVENT">
-            <input type="date" id="pDate" style="width:130px;" value="2026-01-27">
-            <button class="btn" onclick="saveProgramSettings()" style="background:var(--accent); color:#000; height:35px;">SAVE SETTINGS</button>
+<!-- Player Modal -->
+<div id="playerModal">
+  <div id="playerBox">
+    <h2 id="pm-singer">—</h2>
+    <p id="pm-song">—</p>
+    <div id="playerMediaWrap"></div>
+    <div class="player-controls">
+      <div class="ctrl-row">
+        <label>🎵 TEMPO (RATE)</label>
+        <div class="ctrl-wrap">
+          <input type="range" id="tempoSlider" min="0.5" max="2.0" step="0.05" value="1.0" oninput="applyTempo(this.value)">
+          <span id="tempoVal">1.00×</span>
         </div>
-        <div class="timing-dashboard">
-            <div class="time-stat"><label>DURATION</label><div style="display:flex;"><input type="number" id="pDurH" value="3" style="width:25px; border:none; background:transparent; color:var(--accent)">:<input type="number" id="pDurM" value="0" style="width:25px; border:none; background:transparent; color:var(--accent)"></div></div>
-            <div class="time-stat"><label>SINGING</label><span id="totalSingTime">0H 0M</span></div>
-            <div class="time-stat"><label>BREAK</label><input type="number" id="breakTime" value="15" style="width:30px; border:none; background:transparent; color:var(--accent)" oninput="updateCounters()"></div>
-            <div class="time-stat"><label>TOTAL</label><span id="grandTotalTime" style="color:var(--info)">0H 0M</span></div>
-            <div class="time-stat"><label>TIMER</label><div id="progTimer" class="digital-clock">03:00:00</div></div>
-            <div class="btn-stack">
-                <div class="timer-controls">
-                    <button class="btn" onclick="startCountdown()" style="background:var(--info)">START</button>
-                    <button class="btn" onclick="pauseCountdown()">PAUSE</button>
-                    <button class="btn" onclick="stopCountdown()" style="background:var(--danger)">STOP</button>
-                    <button class="btn" onclick="resetCountdown()">RESET</button>
-                </div>
-            </div>
+      </div>
+      <div class="ctrl-row">
+        <label>🎼 PITCH (SEMITONES)</label>
+        <div class="ctrl-wrap">
+          <input type="range" id="pitchSlider" min="-6" max="6" step="1" value="0" oninput="applyPitch(this.value)">
+          <span id="pitchVal">±0 st</span>
         </div>
+      </div>
     </div>
-
-    <div class="input-group">
-        <div class="control-block"><label>Singer</label><input id="singerName" type="text"></div>
-        <div class="control-block"><label>Song</label><input id="songName" type="text"></div>
-        <div class="control-block"><label>Language</label><select id="languageSelect"></select></div>
-        <div class="control-block"><label>Type</label><select id="singingType"></select></div>
-        <div class="control-block"><label>Playback</label><select id="playbackSource"></select></div>
-        <div class="control-block"><label>Format</label><select id="fileType"></select></div>
-        <div class="control-block">
-            <label>Attach File</label>
-            <button class="btn btn-attach" id="attachBtn" onclick="document.getElementById('fileInput').click()">ATTACH FILE</button>
-            <input type="file" id="fileInput" style="display:none" onchange="updateAttachLabel(this)">
-        </div>
-        <button class="btn btn-add" onclick="addSong()">ADD SINGER</button>
+    <div class="player-btns">
+      <button class="pbtn" onclick="pmPlay()" style="background:var(--accent);color:#000;">▶ PLAY</button>
+      <button class="pbtn" onclick="pmPause()" style="background:#333;color:#fff;">⏸ PAUSE</button>
+      <button class="pbtn" onclick="pmStop()" style="background:#555;color:#fff;">⏹ STOP</button>
+      <button class="pbtn" onclick="pmReset()" style="background:#444;color:var(--warn);">↺ RESET</button>
+      <button class="pbtn" onclick="closePlayer()" style="background:var(--danger);color:#fff;">✕ CLOSE</button>
     </div>
+  </div>
+</div>
 
-    <div class="counter-container">
-        <span>TOTAL: <b id="totalSongs">0</b></span>
-        <span>PLAYED (SUNG): <b id="playedSongs">0</b></span>
-        <span>PENDING: <b id="pendingSongs">0</b></span>
-        <div style="margin-left: auto; display: flex; gap: 5px;">
-            <button class="btn" onclick="exportList()" style="background:var(--accent); color:#000;">SAVE LIST (JSON)</button>
-            <button class="btn" onclick="document.getElementById('importListFile').click()">LOAD LIST</button>
-            <input type="file" id="importListFile" style="display:none" accept=".json" onchange="importList(this)">
-            <button class="btn" onclick="saveAsHTML()" style="background:var(--info)">DOWNLOAD HTML</button>
-        </div>
-    </div>
+<div class="main-title">SINGING SHOW MANAGER &nbsp;<small style="font-size:13px;color:#555;">V13</small></div>
 
-    <div class="table-container">
-        <table>
-            <thead>
-                <tr>
-                    <th class="w-id">#</th><th class="w-name">SINGER</th><th class="w-song">SONG</th><th class="w-sel">LANG</th><th class="w-sel">TYPE</th><th class="w-stat">STATUS</th><th class="w-stat">PRES</th><th class="w-sel">PLAYBACK</th><th class="w-sel">FORMAT</th><th class="w-file">FILE / ACTION</th><th class="w-time">MINS</th><th class="w-ord">MOVE</th><th class="w-act">ACTION</th>
-                </tr>
-            </thead>
-            <tbody id="pBody"></tbody>
-        </table>
-    </div>
+<!-- Cloud / Multi-user sync panel -->
+<div id="cloudPanel">
+  <span style="color:#777;font-size:9px;font-weight:bold;">☁ SHARED DATA (JSONBIN):</span>
+  <input id="binId" type="text" placeholder="BIN ID (e.g. 6629…)" style="width:180px;background:#111;border:1px solid #333;color:#ccc;padding:4px 6px;border-radius:4px;font-size:10px;">
+  <input id="binKey" type="password" placeholder="MASTER KEY" style="width:180px;background:#111;border:1px solid #333;color:#ccc;padding:4px 6px;border-radius:4px;font-size:10px;">
+  <button class="btn" onclick="cloudPush()" style="background:var(--info);">⬆ PUSH</button>
+  <button class="btn" onclick="cloudPull()" style="background:#2a5a2a;color:var(--accent);">⬇ PULL</button>
+  <button class="btn" onclick="cloudCreateBin()" style="background:#333;">＋ CREATE BIN</button>
+  <span id="syncStatus" class="sync-ok">OFFLINE</span>
+  <span style="color:#555;font-size:8px;margin-left:4px;">Free JSONBin.io — all users share one bin.</span>
+</div>
 
-<script>
-let playlist = [];
-let timerInterval;
-let remainingSecs = 0;
-let isTimerPaused = false;
-let activePlayer = null;
-let currentHighlightedIndex = -1; 
+<!-- Setup bar -->
+<div class="setup-bar">
+  <div style="flex:2;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+    <input type="text" id="programName" class="header-input" value="KARAOKE_MASTER_EVENT">
+    <input type="date" id="pDate" style="width:128px;" value="2026-01-27">
+    <button class="btn" onclick="saveProgramSettings()" style="background:var(--accent);color:#000;height:34px;">SAVE SETTINGS</button>
+  </div>
+  <div class="timing-dashboard">
+    <div class="time-stat"><label>DURATION</label><div style="display:flex;align-items:center;"><input type="number" id="pDurH" value="3" style="width:24px;border:none;background:transparent;color:var(--accent)">:<input type="number" id="pDurM" value="0" style="width:24px;border:none;background:transparent;color:var(--accent)"></div></div>
+    <div class="time-stat"><label>SINGING</label><span id="totalSingTime">0H 15M</span></div>
+    <div class="time-stat"><label>BREAK</label><input type="number" id="breakTime" value="15" style="width:28px;border:none;background:transparent;color:var(--accent)" oninput="updateCounters()"></div>
+    <div class="time-stat"><label>TOTAL</label><span id="grandTotalTime" style="color:var(--info)">0H 30M</span></div>
+    <div class="time-stat"><label>TIMER</label><div id="progTimer" class="digital-clock">03:00:00</div></div>
+    <div class="btn-stack"><div class="timer-controls">
+      <button class="btn" onclick="startCountdown()" style="background:var(--info)">START</button>
+      <button class="btn" onclick="pauseCountdown()">PAUSE</button>
+      <button class="btn" onclick="stopCountdown()" style="background:var(--danger)">STOP</button>
+      <button class="btn" onclick="resetCountdown()">RESET</button>
+    </div></div>
+  </div>
+</div>
 
-const opts = {
-    lang: ["MALAYALAM","TAMIL","HINDI","ENGLISH","ARABIC","TELUGU","KANNADA","OTHER"],
-    singing: ["MALE SOLO","FEMALE SOLO","MALE DUET","FEMALE DUET","MIXED DUET","MEDLEY"],
-    playback: ["LOCAL","MOBILE","LAPTOP","ONLINE"],
-    file: ["MP3","WAV","MP4","OTHER"]
-};
+<!-- Add Singer form -->
+<div class="input-group">
+  <div class="control-block wide"><label>Singer</label><input id="singerName" type="text"></div>
+  <div class="control-block wide"><label>Song</label><input id="songName" type="text"></div>
+  <div class="control-block"><label>Type</label><select id="singingType" onchange="onTypeChange()"><option>SOLO</option><option>DUET</option><option>MEDLEY</option></select></div>
+  <div class="control-block wide" id="duetPartnerBlock">
+    <label>Duet Partner</label>
+    <select id="duetPartner"><option value="">— SELECT PARTNER —</option><option value="AJI">AJI</option></select>
+  </div>
+  <div class="control-block"><label>Playback</label><select id="playbackSource"><option>LOCAL</option><option>MOBILE</option><option>LAPTOP</option><option>ONLINE</option></select></div>
+  <div class="control-block"><label>Format</label><select id="fileType"><option>MP3</option><option>WAV</option><option>MP4</option><option>OTHER</option></select></div>
+  <div class="control-block">
+    <label>Attach File</label>
+    <button class="btn btn-attach" id="attachBtn" onclick="document.getElementById('fileInput').click()">ATTACH FILE</button>
+    <input type="file" id="fileInput" style="display:none" onchange="updateAttachLabel(this)">
+  </div>
+  <button class="btn btn-add" onclick="addSong()">ADD SINGER</button>
+</div>
 
-let lastEntry = {
-    singer: '', song: '', language: opts.lang[0], singingType: opts.singing[0], playback: opts.playback[0], fileType: opts.file[0]
-};
+<!-- Counter bar -->
+<div class="counter-container">
+  <span>TOTAL: <b id="totalSongs">3</b></span>
+  <span>PLAYED: <b id="playedSongs">0</b></span>
+  <span>PENDING: <b id="pendingSongs">3</b></span>
+  <div style="margin-left:auto;display:flex;gap:5px;flex-wrap:wrap;">
+    <button class="btn" onclick="exportList()" style="background:var(--accent);color:#000;">SAVE LIST (JSON)</button>
+    <button class="btn" onclick="document.getElementById('importListFile').click()">LOAD LIST</button>
+    <input type="file" id="importListFile" style="display:none" accept=".json" onchange="importList(this)">
+    <button class="btn" onclick="saveAsHTML()" style="background:var(--info)">DOWNLOAD HTML</button>
+  </div>
+</div>
 
-function initApp() {
-    populateAddDropdowns();
-    loadSession();
-    loadProgramSettings();
-}
+<!-- Main table -->
+<div class="table-container">
+<table>
+  <thead><tr>
+    <th class="w-id">#</th>
+    <th class="w-name">SINGER</th>
+    <th class="w-song">SONG</th>
+    <th class="w-type">TYPE / PARTNER</th>
+    <th class="w-stat">STATUS</th>
+    <th class="w-pres">PRES</th>
+    <th class="w-play">PLAYBACK</th>
+    <th class="w-fmt">FMT</th>
+    <th class="w-file">FILE / ACTION</th>
+    <th class="w-min">MIN</th>
+    <th class="w-ord">MOVE</th>
+    <th class="w-act">ACTIONS</th>
+  </tr></thead>
+  <tbody id="pBody">
+    <tr class="" ondblclick="toggleHighlight(0,event)">
+      <td>1</td>
+      <td><span class="singer-warn">AJI</span></td>
+      <td>QWER</td>
+      <td><select onchange="quickEditType(0,this.value)"><option selected="">SOLO</option><option>DUET</option><option>MEDLEY</option></select></td>
+      <td><button class="toggle-btn status-pending" onclick="toggleStatus(0)">PENDING</button></td>
+      <td><button class="toggle-btn presence-present" onclick="togglePresence(0)">PRESENT</button></td>
+      <td><select onchange="edit(0,'playback',this.value)"><option selected="">LOCAL</option><option>MOBILE</option><option>LAPTOP</option><option>ONLINE</option></select></td>
+      <td><select onchange="edit(0,'fileType',this.value)"><option selected="">MP3</option><option>WAV</option><option>MP4</option><option>OTHER</option></select></td>
+      <td><div class="file-cell-wrap"><button class="btn btn-attach" onclick="document.getElementById('fr0').click()" style="width:100%;font-size:8px;">ATTACH</button><input type="file" id="fr0" onchange="replaceFile(0,this.files[0])" style="display:none;"></div></td>
+      <td>5</td>
+      <td>
+        <button class="btn" onclick="move(0,-1,event)" style="padding:3px 5px;">▲</button>
+        <button class="btn" onclick="move(0,1,event)" style="padding:3px 5px;">▼</button>
+      </td>
+      <td><button class="btn btn-edit" onclick="startEdit(0)">EDIT</button>
+         <button class="btn" style="background:#333;color:#666;" onclick="openPlayer(0)" disabled="">▶</button>
+         <button class="btn btn-duplicate" onclick="duplicateRow(0)">DUP</button>
+         <button class="btn" onclick="deleteRow(0)" style="background:var(--danger);">✕</button></td>
+    </tr>
+    <tr class="" ondblclick="toggleHighlight(1,event)">
+      <td>2</td>
+      <td><span class="singer-warn">AJI</span></td>
+      <td>QWER</td>
+      <td><select onchange="quickEditType(1,this.value)"><option selected="">SOLO</option><option>DUET</option><option>MEDLEY</option></select></td>
+      <td><button class="toggle-btn status-pending" onclick="toggleStatus(1)">PENDING</button></td>
+      <td><button class="toggle-btn presence-present" onclick="togglePresence(1)">PRESENT</button></td>
+      <td><select onchange="edit(1,'playback',this.value)"><option selected="">LOCAL</option><option>MOBILE</option><option>LAPTOP</option><option>ONLINE</option></select></td>
+      <td><select onchange="edit(1,'fileType',this.value)"><option selected="">MP3</option><option>WAV</option><option>MP4</option><option>OTHER</option></select></td>
+      <td><div class="file-cell-wrap"><button class="btn btn-attach" onclick="document.getElementById('fr1').click()" style="width:100%;font-size:8px;">ATTACH</button><input type="file" id="fr1" onchange="replaceFile(1,this.files[0])" style="display:none;"></div></td>
+      <td>5</td>
+      <td>
+        <button class="btn" onclick="move(1,-1,event)" style="padding:3px 5px;">▲</button>
+        <button class="btn" onclick="move(1,1,event)" style="padding:3px 5px;">▼</button>
+      </td>
+      <td><button class="btn btn-edit" onclick="startEdit(1)">EDIT</button>
+         <button class="btn" style="background:#333;color:#666;" onclick="openPlayer(1)" disabled="">▶</button>
+         <button class="btn btn-duplicate" onclick="duplicateRow(1)">DUP</button>
+         <button class="btn" onclick="deleteRow(1)" style="background:var(--danger);">✕</button></td>
+    </tr>
+    <tr class="" ondblclick="toggleHighlight(2,event)">
+      <td>3</td>
+      <td><span class="singer-warn">AJI</span></td>
+      <td>QWER</td>
+      <td><select onchange="quickEditType(2,this.value)"><option selected="">SOLO</option><option>DUET</option><option>MEDLEY</option></select></td>
+      <td><button class="toggle-btn status-pending" onclick="toggleStatus(2)">PENDING</button></td>
+      <td><button class="toggle-btn presence-present" onclick="togglePresence(2)">PRESENT</button></td>
+      <td><select onchange="edit(2,'playback',this.value)"><option selected="">LOCAL</option><option>MOBILE</option><option>LAPTOP</option><option>ONLINE</option></select></td>
+      <td><select onchange="edit(2,'fileType',this.value)"><option selected="">MP3</option><option>WAV</option><option>MP4</option><option>OTHER</option></select></td>
+      <td><div class="file-cell-wrap"><button class="btn btn-attach" onclick="document.getElementById('fr2').click()" style="width:100%;font-size:8px;">ATTACH</button><input type="file" id="fr2" onchange="replaceFile(2,this.files[0])" style="display:none;"></div></td>
+      <td>5</td>
+      <td>
+        <button class="btn" onclick="move(2,-1,event)" style="padding:3px 5px;">▲</button>
+        <button class="btn" onclick="move(2,1,event)" style="padding:3px 5px;">▼</button>
+      </td>
+      <td><button class="btn btn-edit" onclick="startEdit(2)">EDIT</button>
+         <button class="btn" style="background:#333;color:#666;" onclick="openPlayer(2)" disabled="">▶</button>
+         <button class="btn btn-duplicate" onclick="duplicateRow(2)">DUP</button>
+         <button class="btn" onclick="deleteRow(2)" style="background:var(--danger);">✕</button></td>
+    </tr></tbody>
+</table>
+</div>
 
-function populateAddDropdowns() {
-    document.getElementById('languageSelect').innerHTML = opts.lang.map(o => `<option value="${o}">${o}</option>`).join('');
-    document.getElementById('singingType').innerHTML = opts.singing.map(o => `<option value="${o}">${o}</option>`).join('');
-    document.getElementById('playbackSource').innerHTML = opts.playback.map(o => `<option value="${o}">${o}</option>`).join('');
-    document.getElementById('fileType').innerHTML = opts.file.map(o => `<option value="${o}">${o}</option>`).join('');
-}
-
-function saveProgramSettings() {
-    const settings = {
-        name: document.getElementById('programName').value,
-        date: document.getElementById('pDate').value, durH: document.getElementById('pDurH').value,
-        durM: document.getElementById('pDurM').value, break: document.getElementById('breakTime').value
-    };
-    localStorage.setItem('karaoke_program_settings', JSON.stringify(settings));
-    alert("Settings Saved Successfully!");
-}
-
-function loadProgramSettings() {
-    const stored = localStorage.getItem('karaoke_program_settings');
-    if (stored) {
-        const s = JSON.parse(stored);
-        document.getElementById('programName').value = s.name || "KARAOKE_MASTER_EVENT";
-        document.getElementById('pDate').value = s.date || "2026-01-27";
-        document.getElementById('pDurH').value = s.durH || "3";
-        document.getElementById('pDurM').value = s.durM || "0";
-        document.getElementById('breakTime').value = s.break || "15";
-        updateCounters(); resetCountdown();
+<!-- Embedded data block — rewritten on every Save/Download -->
+<script id="embeddedData" type="application/json">
+{
+  "playlist": [
+    {
+      "singer": "AJI",
+      "song": "QWER",
+      "singingType": "SOLO",
+      "duetPartner": "",
+      "status": "PENDING",
+      "presence": "PRESENT",
+      "playback": "LOCAL",
+      "fileType": "MP3",
+      "fileName": "",
+      "fileURL": "",
+      "avgMin": 5
+    },
+    {
+      "singer": "AJI",
+      "song": "QWER",
+      "singingType": "SOLO",
+      "duetPartner": "",
+      "status": "PENDING",
+      "presence": "PRESENT",
+      "playback": "LOCAL",
+      "fileType": "MP3",
+      "fileName": "",
+      "fileURL": "",
+      "avgMin": 5
+    },
+    {
+      "singer": "AJI",
+      "song": "QWER",
+      "singingType": "SOLO",
+      "duetPartner": "",
+      "status": "PENDING",
+      "presence": "PRESENT",
+      "playback": "LOCAL",
+      "fileType": "MP3",
+      "fileName": "",
+      "fileURL": "",
+      "avgMin": 5
     }
-}
-
-function loadSession() {
-    const stored = localStorage.getItem('karaoke_v2_26_018');
-    if (stored) { try { playlist = JSON.parse(stored); render(); } catch(e) { playlist = []; } }
-    const storedLastEntry = localStorage.getItem('karaoke_last_entry');
-    if (storedLastEntry) { try { lastEntry = JSON.parse(storedLastEntry); populateFormWithLastEntry(); } catch(e) {} }
-}
-
-function populateFormWithLastEntry() {
-    document.getElementById('singerName').value = lastEntry.singer || '';
-    document.getElementById('songName').value = lastEntry.song || '';
-    document.getElementById('languageSelect').value = lastEntry.language || opts.lang[0];
-    document.getElementById('singingType').value = lastEntry.singingType || opts.singing[0];
-    document.getElementById('playbackSource').value = lastEntry.playback || opts.playback[0];
-    document.getElementById('fileType').value = lastEntry.fileType || opts.file[0];
-}
-
-function updateAttachLabel(input) { if (input.files && input.files[0]) { document.getElementById('attachBtn').innerText = input.files[0].name.toUpperCase(); } }
-
-function addSong() {
-    const singer = document.getElementById('singerName').value.trim().toUpperCase();
-    const song = document.getElementById('songName').value.trim().toUpperCase();
-    if (!singer || !song) { alert("Singer and Song are required!"); return; }
-    const fileInput = document.getElementById('fileInput');
-    const newEntry = {
-        singer: singer, song: song, language: document.getElementById('languageSelect').value,
-        singingType: document.getElementById('singingType').value, status: "PENDING", presence: "PRESENT",
-        playback: document.getElementById('playbackSource').value, fileType: document.getElementById('fileType').value,
-        fileName: "", fileURL: "", avgMin: 5
-    };
-    if (fileInput.files && fileInput.files[0]) {
-        newEntry.fileName = fileInput.files[0].name.toUpperCase();
-        newEntry.fileURL = URL.createObjectURL(fileInput.files[0]);
-    }
-    playlist.push(newEntry);
-    lastEntry = { singer, song, language: newEntry.language, singingType: newEntry.singingType, playback: newEntry.playback, fileType: newEntry.fileType };
-    localStorage.setItem('karaoke_last_entry', JSON.stringify(lastEntry));
-    document.getElementById('attachBtn').innerText = 'ATTACH FILE';
-    fileInput.value = '';
-    saveSession(); render();
-}
-
-function duplicateRow(i) {
-    const original = playlist[i];
-    const duplicate = { ...original, status: "PENDING", presence: "PRESENT" };
-    playlist.splice(i + 1, 0, duplicate);
-    saveSession(); render();
-}
-
-function render() {
-    const body = document.getElementById('pBody');
-    body.innerHTML = '';
-    playlist.forEach((s, i) => {
-        const hasFile = s.fileURL && s.fileURL.trim() !== "";
-        const highlightClass = (i === currentHighlightedIndex) ? 'row-moving' : '';
-        const fileDisplay = hasFile 
-            ? `<div class="file-cell-wrap"><div class="file-name-text">${s.fileName}</div><button class="btn" onclick="detachFile(${i})" style="background:var(--danger);">DETACH FILE</button></div>` 
-            : `<div class="file-cell-wrap"><button class="btn btn-attach" onclick="document.getElementById('fileReplace${i}').click()" style="width:100%;">ATTACH FILE</button><input type="file" id="fileReplace${i}" onchange="replaceFile(${i},this.files[0])" style="display:none;"></div>`;
-
-        body.innerHTML += `
-        <tr class="${highlightClass}" ondblclick="toggleHighlight(${i}, event)">
-            <td>${i+1}</td>
-            <td contenteditable="true" onblur="edit(${i},'singer',this.innerText)">${s.singer}</td>
-            <td contenteditable="true" onblur="edit(${i},'song',this.innerText)">${s.song}</td>
-            <td><select onchange="edit(${i},'language',this.value)">${opts.lang.map(o=>`<option ${o===s.language?'selected':''}>${o}</option>`).join('')}</select></td>
-            <td><select onchange="edit(${i},'singingType',this.value)">${opts.singing.map(o=>`<option ${o===s.singingType?'selected':''}>${o}</option>`).join('')}</select></td>
-            <td><button class="toggle-btn status-${s.status.toLowerCase()}" onclick="toggleStatus(${i})">${s.status}</button></td>
-            <td><button class="toggle-btn presence-${s.presence.toLowerCase()}" onclick="togglePresence(${i})">${s.presence}</button></td>
-            <td><select onchange="edit(${i},'playback',this.value)">${opts.playback.map(o=>`<option ${o===s.playback?'selected':''}>${o}</option>`).join('')}</select></td>
-            <td><select onchange="edit(${i},'fileType',this.value)">${opts.file.map(o=>`<option ${o===s.fileType?'selected':''}>${o}</option>`).join('')}</select></td>
-            <td>${fileDisplay}</td>
-            <td contenteditable="true" onblur="edit(${i},'avgMin',this.innerText)">${s.avgMin}</td>
-            <td>
-                <button class="btn" onclick="move(${i},-1, event)">▲</button>
-                <button class="btn" onclick="move(${i},1, event)">▼</button>
-            </td>
-            <td>
-                <button class="btn" style="background:${hasFile?'#fff':'#333'}; color:${hasFile?'#000':'#666'};" onclick="playTrack(${i})" ${!hasFile?'disabled':''}>PLAY</button>
-                <button class="btn btn-duplicate" onclick="duplicateRow(${i})">DUP</button>
-                <button class="btn" onclick="deleteRow(${i})">X</button>
-            </td>
-        </tr>`;
-    });
-    updateCounters();
-}
-
-// Function to handle double click on the row
-function toggleHighlight(i, e) {
-    // If double clicked row is already highlighted, turn it off
-    if (currentHighlightedIndex === i) {
-        currentHighlightedIndex = -1;
-    } else {
-        currentHighlightedIndex = i;
-    }
-    render();
-}
-
-function move(i, d, e) { 
-    // Prevent the row dblclick event when clicking move buttons
-    if(e) e.stopPropagation();
-    
-    let t = i+d; 
-    if(t>=0 && t<playlist.length) { 
-        [playlist[i], playlist[t]] = [playlist[t], playlist[i]]; 
-        // Move the highlight with the row
-        if (currentHighlightedIndex === i) currentHighlightedIndex = t;
-        saveSession(); 
-        render(); 
-    } 
-}
-
-function detachFile(i) { playlist[i].fileName = ""; playlist[i].fileURL = ""; saveSession(); render(); }
-function replaceFile(i, file) { if(file) { playlist[i].fileName = file.name.toUpperCase(); playlist[i].fileURL = URL.createObjectURL(file); saveSession(); render(); } }
-function toggleStatus(i) { playlist[i].status = (playlist[i].status === "PENDING" ? "SUNG" : "PENDING"); saveSession(); render(); }
-function togglePresence(i) { playlist[i].presence = (playlist[i].presence === "PRESENT" ? "ABSENT" : "PRESENT"); saveSession(); render(); }
-
-function startCountdown() {
-    if (isTimerPaused && remainingSecs > 0) { isTimerPaused = false; } 
-    else { remainingSecs = (parseInt(document.getElementById('pDurH').value) * 3600) + (parseInt(document.getElementById('pDurM').value) * 60); }
-    clearInterval(timerInterval);
-    timerInterval = setInterval(() => { if (remainingSecs <= 0) { stopCountdown(); return; } remainingSecs--; updateTimerDisplay(); }, 1000);
-}
-function stopCountdown() { clearInterval(timerInterval); remainingSecs = 0; isTimerPaused = false; updateTimerDisplay(); }
-function pauseCountdown() { clearInterval(timerInterval); isTimerPaused = true; }
-function resetCountdown() { stopCountdown(); remainingSecs = (parseInt(document.getElementById('pDurH').value) * 3600) + (parseInt(document.getElementById('pDurM').value) * 60); updateTimerDisplay(); }
-function updateTimerDisplay() {
-    const h = Math.floor(remainingSecs / 3600).toString().padStart(2, '0');
-    const m = Math.floor((remainingSecs % 3600) / 60).toString().padStart(2, '0');
-    const s = (remainingSecs % 60).toString().padStart(2, '0');
-    document.getElementById('progTimer').innerText = `${h}:${m}:${s}`;
-}
-
-function updateCounters() {
-    const total = playlist.length;
-    const sung = playlist.filter(s => s.status === "SUNG").length;
-    let singMins = 0; playlist.forEach(s => { if(s.status === "PENDING") singMins += parseInt(s.avgMin || 0); });
-    document.getElementById("totalSongs").innerText = total;
-    document.getElementById("playedSongs").innerText = sung;
-    document.getElementById("pendingSongs").innerText = total - sung;
-    document.getElementById("totalSingTime").innerText = Math.floor(singMins/60) + "H " + (singMins%60) + "M";
-    document.getElementById("grandTotalTime").innerText = Math.floor((singMins+(parseInt(document.getElementById('breakTime').value)||0))/60) + "H " + ((singMins+(parseInt(document.getElementById('breakTime').value)||0))%60) + "M";
-}
-
-function exportList() {
-    const data = JSON.stringify(playlist.map(s => ({...s, fileURL: ''})));
-    const blob = new Blob([data], {type: 'application/json'});
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `Playlist_${document.getElementById('programName').value}.json`;
-    a.click();
-}
-
-function importList(input) {
-    const file = input.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (e) => { try { playlist = JSON.parse(e.target.result); render(); saveSession(); } catch (err) { alert("Invalid File Format"); } };
-    reader.readAsText(file);
-}
-
-function playTrack(i) {
-    if (activePlayer && !activePlayer.closed) { alert("A track is currently playing. Close the active player window first."); activePlayer.focus(); return; }
-    const s = playlist[i];
-    activePlayer = window.open("", "Player", `width=600,height=500`);
-    activePlayer.document.write(`<body style="background:#000; color:#fff; font-family:sans-serif; text-align:center; padding:20px; border:5px solid #3df576;"><h1 style="color:#3df576;">${s.singer}</h1><p>${s.song}</p><div style="margin:20px 0;">${s.fileName.toLowerCase().endsWith('.mp4') ? `<video id="m" src="${s.fileURL}" style="max-width:100%;"></video>` : `<audio id="m" src="${s.fileURL}" style="width:90%;"></audio>`}</div><button onclick="document.getElementById('m').play()" style="padding:10px 20px; background:#3df576; border:none; border-radius:5px; font-weight:bold;">PLAY</button> <button onclick="window.close()" style="padding:10px 20px; background:#222; color:#fff; border:1px solid #444; border-radius:5px;">CLOSE</button><script>window.onload=()=>{document.getElementById('m').play();}<\/script></body>`);
-}
-
-function edit(i, f, v) { playlist[i][f] = v.toUpperCase(); saveSession(); }
-function deleteRow(i) { playlist.splice(i, 1); saveSession(); render(); }
-function saveSession() { localStorage.setItem('karaoke_v2_26_018', JSON.stringify(playlist.map(s => ({...s, fileURL: ''})))); }
-function saveAsHTML() {
-    const blob = new Blob([document.documentElement.outerHTML], {type: 'text/html'});
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `MASTER_PLAYER-V2.0-26-018.html`;
-    a.click();
+  ],
+  "settings": {
+    "name": "KARAOKE_MASTER_EVENT",
+    "date": "2026-01-27",
+    "durH": "3",
+    "durM": "0",
+    "break": "15"
+  },
+  "cloud": {
+    "binId": "",
+    "binKey": ""
+  }
 }
 </script>
-</body>
-</html>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════════════════════════ */
+let playlist = [];
+let editingIndex = -1;          // row currently in edit mode (-1 = none)
+let timerInterval, remainingSecs = 0, isTimerPaused = false;
+let currentHighlightedIndex = -1;
+let _toastTimer = null;
+let _pmMedia = null;            // active media element in player modal
+let _pitchNodes = {};           // Web Audio nodes for pitch shift
+
+const opts = {
+  singing : ['SOLO','DUET','MEDLEY'],
+  playback: ['LOCAL','MOBILE','LAPTOP','ONLINE'],
+  file    : ['MP3','WAV','MP4','OTHER']
+};
+
+/* ═══════════════════════════════════════════════════════════════════
+   VALIDATION
+   Allowed combos (solo, duet) — medley never counts:
+     [2,0]  two solo
+     [1,2]  one solo + two duet
+     [0,3]  three duet
+   A partial state is valid if it is a subset of ANY allowed combo.
+═══════════════════════════════════════════════════════════════════ */
+function singerStats(name){
+  const up = name.toUpperCase();
+  return {
+    solos : playlist.filter(s=>s.singer.toUpperCase()===up && s.singingType==='SOLO').length,
+    duets : playlist.filter(s=>s.singer.toUpperCase()===up && s.singingType==='DUET').length
+  };
+}
+
+function isSingerViolating(name){
+  const {solos,duets} = singerStats(name);
+  if(solos===0 && duets===0) return false;
+  // valid if fits inside at least one allowed combo ceiling
+  const allowed=[[2,0],[1,2],[0,3]];
+  return !allowed.some(([ms,md])=>solos<=ms && duets<=md);
+}
+
+function violationMessage(name){
+  const {solos,duets} = singerStats(name);
+  if(solos>2)                 return `"${name}" has ${solos} solo songs (max 2).`;
+  if(solos===2 && duets>0)    return `"${name}" has 2 solos + ${duets} duet(s) — not an allowed combo.`;
+  if(solos===1 && duets>2)    return `"${name}" has 1 solo + ${duets} duets (max 2 duets with 1 solo).`;
+  if(solos===0 && duets>3)    return `"${name}" has ${duets} duet songs (max 3).`;
+  return `"${name}" has exceeded the allowed song combination limit.`;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════════════════════════ */
+function initApp(){
+  populateAddDropdowns();
+  loadEmbeddedData();
+}
+
+function populateAddDropdowns(){
+  document.getElementById('singingType').innerHTML    = opts.singing .map(o=>`<option>${o}</option>`).join('');
+  document.getElementById('playbackSource').innerHTML = opts.playback.map(o=>`<option>${o}</option>`).join('');
+  document.getElementById('fileType').innerHTML       = opts.file    .map(o=>`<option>${o}</option>`).join('');
+}
+
+function refreshDuetPartnerDropdown(selectId, currentVal){
+  const names = [...new Set(playlist.map(s=>s.singer.toUpperCase()))].sort();
+  const sel   = document.getElementById(selectId);
+  if(!sel) return;
+  const prev  = currentVal !== undefined ? currentVal : sel.value;
+  sel.innerHTML = `<option value="">— SELECT PARTNER —</option>`
+    + names.map(n=>`<option value="${n}" ${n===prev?'selected':''}>${n}</option>`).join('');
+}
+
+function onTypeChange(){
+  const type  = document.getElementById('singingType').value;
+  const block = document.getElementById('duetPartnerBlock');
+  block.style.display = (type==='DUET') ? 'flex' : 'none';
+  if(type==='DUET') refreshDuetPartnerDropdown('duetPartner');
+  else document.getElementById('duetPartner').value = '';
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   EMBEDDED DATA PERSISTENCE
+═══════════════════════════════════════════════════════════════════ */
+function loadEmbeddedData(){
+  try{
+    const obj = JSON.parse(document.getElementById('embeddedData').textContent.trim());
+    playlist  = Array.isArray(obj.playlist) ? obj.playlist : [];
+    if(obj.settings) applySettings(obj.settings);
+    if(obj.cloud){
+      document.getElementById('binId') .value = obj.cloud.binId  || '';
+      document.getElementById('binKey').value = obj.cloud.binKey || '';
+    }
+  }catch(e){ playlist=[]; }
+  render();
+  resetCountdown();
+}
+
+function applySettings(s){
+  document.getElementById('programName').value = s.name  || 'KARAOKE_MASTER_EVENT';
+  document.getElementById('pDate').value        = s.date  || '2026-01-27';
+  document.getElementById('pDurH').value         = s.durH  || '3';
+  document.getElementById('pDurM').value         = s.durM  || '0';
+  document.getElementById('breakTime').value     = s.break || '15';
+  updateCounters();
+}
+
+function buildPayload(){
+  return {
+    playlist: playlist.map(s=>({...s,fileURL:''})),
+    settings:{
+      name : document.getElementById('programName').value,
+      date : document.getElementById('pDate').value,
+      durH : document.getElementById('pDurH').value,
+      durM : document.getElementById('pDurM').value,
+      break: document.getElementById('breakTime').value
+    },
+    cloud:{
+      binId : document.getElementById('binId').value.trim(),
+      binKey: document.getElementById('binKey').value.trim()
+    }
+  };
+}
+
+function bakeAndDownload(filename){
+  const payload = JSON.stringify(buildPayload(), null, 2);
+  let html = document.documentElement.outerHTML;
+  html = html.replace(
+    /(<script\s+id="embeddedData"[^>]*>)([\s\S]*?)(<\/script>)/,
+    `$1\n${payload}\n$3`
+  );
+  const a = document.createElement('a');
+  a.href     = URL.createObjectURL(new Blob([html],{type:'text/html'}));
+  a.download = filename;
+  a.click();
+}
+
+function saveProgramSettings(){
+  bakeAndDownload('MASTER_PLAYER-V2.0-26-025-V13.html');
+  toast('✔ Saved! New HTML downloaded — open it to restore all data.','#1a6a1a');
+}
+
+function saveAsHTML(){ bakeAndDownload('MASTER_PLAYER-V2.0-26-025-V13.html'); }
+
+/* ═══════════════════════════════════════════════════════════════════
+   CLOUD SYNC  (JSONBin.io — free, no login required for reads)
+   How to set up:
+     1. Go to https://jsonbin.io  → sign up free
+     2. Create a bin with {} as default content → copy the Bin ID
+     3. In Account → API Keys → copy your Master Key
+     4. Paste both into the fields above and click PUSH
+   Any user who has the Bin ID (public bin) can PULL the data.
+   PUSH requires the Master Key.
+═══════════════════════════════════════════════════════════════════ */
+function setSyncStatus(msg,cls){
+  const el=document.getElementById('syncStatus');
+  el.textContent=msg; el.className=''; el.classList.add(cls);
+}
+
+async function cloudPush(){
+  const binId  = document.getElementById('binId') .value.trim();
+  const binKey = document.getElementById('binKey').value.trim();
+  if(!binId||!binKey){ alert('Enter Bin ID and Master Key first.'); return; }
+  setSyncStatus('PUSHING…','sync-busy');
+  try{
+    const body = JSON.stringify({ karaoke: buildPayload() });
+    const r = await fetch(`https://api.jsonbin.io/v3/b/${binId}`,{
+      method:'PUT',
+      headers:{'Content-Type':'application/json','X-Master-Key':binKey},
+      body
+    });
+    if(!r.ok) throw new Error(r.status);
+    setSyncStatus('PUSHED ✔','sync-ok');
+    toast('☁ Data pushed to shared bin!','#1a3a6a');
+  }catch(e){
+    setSyncStatus('PUSH ERR','sync-err');
+    toast('☁ Push failed: '+e.message,'');
+  }
+}
+
+async function cloudPull(){
+  const binId  = document.getElementById('binId').value.trim();
+  if(!binId){ alert('Enter Bin ID first.'); return; }
+  setSyncStatus('PULLING…','sync-busy');
+  try{
+    const r = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`,{
+      headers:{'X-Bin-Meta':'false'}
+    });
+    if(!r.ok) throw new Error(r.status);
+    const json = await r.json();
+    const data = json.karaoke || json;
+    if(Array.isArray(data.playlist)) playlist = data.playlist;
+    if(data.settings) applySettings(data.settings);
+    setSyncStatus('PULLED ✔','sync-ok');
+    render();
+    toast('☁ Data pulled from shared bin!','#1a3a6a');
+  }catch(e){
+    setSyncStatus('PULL ERR','sync-err');
+    toast('☁ Pull failed: '+e.message,'');
+  }
+}
+
+async function cloudCreateBin(){
+  const binKey = document.getElementById('binKey').value.trim();
+  if(!binKey){ alert('Enter your Master Key first (get it from jsonbin.io → Account → API Keys).'); return; }
+  setSyncStatus('CREATING…','sync-busy');
+  try{
+    const r = await fetch('https://api.jsonbin.io/v3/b',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','X-Master-Key':binKey,'X-Bin-Name':'KaraokeManager'},
+      body: JSON.stringify({ karaoke: buildPayload() })
+    });
+    if(!r.ok) throw new Error(r.status);
+    const json = await r.json();
+    const newId = json.metadata?.id || json.metadata?.bin_id || '';
+    document.getElementById('binId').value = newId;
+    setSyncStatus('CREATED ✔','sync-ok');
+    toast(`☁ Bin created! ID: ${newId} — share this ID with other users so they can PULL.`,'#1a3a6a');
+  }catch(e){
+    setSyncStatus('CREATE ERR','sync-err');
+    toast('☁ Create failed: '+e.message,'');
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════════════════════════════ */
+function toast(msg, bg){
+  const el=document.getElementById('toastBox');
+  el.textContent=msg;
+  el.style.background = bg || 'var(--danger)';
+  el.style.display='block';
+  el.style.animation='none'; el.offsetHeight;
+  el.style.animation='toastIn .3s ease forwards';
+  if(_toastTimer) clearTimeout(_toastTimer);
+  _toastTimer=setTimeout(()=>{
+    el.style.animation='toastOut .4s ease forwards';
+    setTimeout(()=>{el.style.display='none';},420);
+  },4200);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   ADD SONG
+═══════════════════════════════════════════════════════════════════ */
+function updateAttachLabel(input){
+  if(input.files&&input.files[0])
+    document.getElementById('attachBtn').innerText=input.files[0].name.toUpperCase();
+}
+
+function addSong(){
+  const singer=document.getElementById('singerName').value.trim().toUpperCase();
+  const song  =document.getElementById('songName')  .value.trim().toUpperCase();
+  if(!singer||!song){ alert('Singer and Song are required!'); return; }
+  const type   =document.getElementById('singingType')   .value;
+  const partner=(type==='DUET') ? document.getElementById('duetPartner').value.trim().toUpperCase() : '';
+  const fi=document.getElementById('fileInput');
+  const entry={
+    singer,song,singingType:type,duetPartner:partner,
+    status:'PENDING',presence:'PRESENT',
+    playback:document.getElementById('playbackSource').value,
+    fileType:document.getElementById('fileType').value,
+    fileName:'',fileURL:'',avgMin:5
+  };
+  if(fi.files&&fi.files[0]){ entry.fileName=fi.files[0].name.toUpperCase(); entry.fileURL=URL.createObjectURL(fi.files[0]); }
+  playlist.push(entry);
+  if(isSingerViolating(singer)) toast(violationMessage(singer));
+  document.getElementById('attachBtn').innerText='ATTACH FILE';
+  fi.value='';
+  render();
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   RENDER
+═══════════════════════════════════════════════════════════════════ */
+function render(){
+  const body=document.getElementById('pBody');
+  body.innerHTML='';
+  // Refresh partner dropdown in add-form to include any new singers
+  refreshDuetPartnerDropdown('duetPartner');
+
+  playlist.forEach((s,i)=>{
+    const hasFile  = s.fileURL&&s.fileURL.trim()!=='';
+    const hlClass  = i===currentHighlightedIndex ? 'row-moving' : '';
+    const isEdit   = i===editingIndex;
+    const violates = isSingerViolating(s.singer);
+    const sClass   = violates ? 'singer-warn' : 'singer-ok';
+
+    /* Singer cell */
+    const singerCell = isEdit
+      ? `<input type="text" id="ed_singer_${i}" value="${esc(s.singer)}" style="width:100%;">`
+      : `<span class="${sClass}">${s.singer}</span>`;
+
+    /* Song cell */
+    const songCell = isEdit
+      ? `<input type="text" id="ed_song_${i}" value="${esc(s.song)}" style="width:100%;">`
+      : s.song;
+
+    /* Type + partner cell */
+    const typeCell = buildTypeCell(i,s,isEdit);
+
+    /* File cell */
+    const fileCell = hasFile
+      ? `<div class="file-cell-wrap"><div class="file-name-text" title="${s.fileName}">${s.fileName}</div><button class="btn" onclick="detachFile(${i})" style="background:var(--danger);font-size:8px;">✕</button></div>`
+      : `<div class="file-cell-wrap"><button class="btn btn-attach" onclick="document.getElementById('fr${i}').click()" style="width:100%;font-size:8px;">ATTACH</button><input type="file" id="fr${i}" onchange="replaceFile(${i},this.files[0])" style="display:none;"></div>`;
+
+    /* MINS cell */
+    const minCell = isEdit
+      ? `<input type="number" id="ed_min_${i}" value="${s.avgMin}" style="width:32px;">`
+      : s.avgMin;
+
+    /* Action buttons */
+    const actCell = isEdit
+      ? `<button class="btn btn-save" onclick="saveEdit(${i})">SAVE</button>
+         <button class="btn" onclick="cancelEdit()" style="background:var(--danger);">✕</button>`
+      : `<button class="btn btn-edit" onclick="startEdit(${i})">EDIT</button>
+         <button class="btn" style="background:${hasFile?'#fff':'#333'};color:${hasFile?'#000':'#666'};" onclick="openPlayer(${i})" ${!hasFile?'disabled':''}>▶</button>
+         <button class="btn btn-duplicate" onclick="duplicateRow(${i})">DUP</button>
+         <button class="btn" onclick="deleteRow(${i})" style="background:var(--danger);">✕</button>`;
+
+    body.innerHTML+=`
+    <tr class="${hlClass}${isEdit?' editing-row':''}" ondblclick="toggleHighlight(${i},event)">
+      <td>${i+1}</td>
+      <td>${singerCell}</td>
+      <td>${songCell}</td>
+      <td>${typeCell}</td>
+      <td><button class="toggle-btn status-${s.status.toLowerCase()}" onclick="toggleStatus(${i})">${s.status}</button></td>
+      <td><button class="toggle-btn presence-${s.presence.toLowerCase()}" onclick="togglePresence(${i})">${s.presence}</button></td>
+      <td><select onchange="edit(${i},'playback',this.value)">${opts.playback.map(o=>`<option ${o===s.playback?'selected':''}>${o}</option>`).join('')}</select></td>
+      <td><select onchange="edit(${i},'fileType',this.value)">${opts.file.map(o=>`<option ${o===s.fileType?'selected':''}>${o}</option>`).join('')}</select></td>
+      <td>${fileCell}</td>
+      <td>${minCell}</td>
+      <td>
+        <button class="btn" onclick="move(${i},-1,event)" style="padding:3px 5px;">▲</button>
+        <button class="btn" onclick="move(${i},1,event)"  style="padding:3px 5px;">▼</button>
+      </td>
+      <td>${actCell}</td>
+    </tr>`;
+  });
+  updateCounters();
+}
+
+function buildTypeCell(i,s,isEdit){
+  const singerNames = [...new Set(playlist.map(p=>p.singer.toUpperCase()))].sort();
+  const partnerOpts = `<option value="">—</option>`
+    +singerNames.map(n=>`<option value="${n}" ${n===s.duetPartner?'selected':''}>${n}</option>`).join('');
+
+  if(isEdit){
+    const typeSel=`<select id="ed_type_${i}" onchange="editTypeInline(${i})">${opts.singing.map(o=>`<option ${o===s.singingType?'selected':''}>${o}</option>`).join('')}</select>`;
+    const partnerSel = s.singingType==='DUET'
+      ? `<select id="ed_partner_${i}" style="margin-top:2px;">${partnerOpts}</select>`
+      : `<span id="ed_partner_${i}"></span>`;
+    return `<div style="display:flex;flex-direction:column;gap:2px;">${typeSel}${partnerSel}</div>`;
+  }
+  // view mode
+  const dd=`<select onchange="quickEditType(${i},this.value)">${opts.singing.map(o=>`<option ${o===s.singingType?'selected':''}>${o}</option>`).join('')}</select>`;
+  if(s.singingType==='DUET'){
+    return `<div style="display:flex;flex-direction:column;gap:2px;">${dd}
+      <select onchange="quickEditPartner(${i},this.value)" style="font-size:8px;color:var(--warn);background:#1a1a1a;border:1px solid var(--warn);border-radius:3px;">${partnerOpts}</select>
+    </div>`;
+  }
+  return dd;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   EDIT MODE (row-level)
+═══════════════════════════════════════════════════════════════════ */
+function startEdit(i){  editingIndex=i;  render(); }
+function cancelEdit(){  editingIndex=-1; render(); }
+
+function editTypeInline(i){
+  // toggle partner field visibility without full re-render
+  const type=document.getElementById(`ed_type_${i}`).value;
+  const pEl =document.getElementById(`ed_partner_${i}`);
+  if(!pEl) return;
+  const singerNames=[...new Set(playlist.map(p=>p.singer.toUpperCase()))].sort();
+  const opts2=`<option value="">—</option>`+singerNames.map(n=>`<option value="${n}" ${n===playlist[i].duetPartner?'selected':''}>${n}</option>`).join('');
+  if(type==='DUET'){
+    pEl.outerHTML=`<select id="ed_partner_${i}" style="margin-top:2px;">${opts2}</select>`;
+  } else {
+    pEl.outerHTML=`<span id="ed_partner_${i}"></span>`;
+  }
+}
+
+function saveEdit(i){
+  const s=playlist[i];
+  s.singer     =(document.getElementById(`ed_singer_${i}`)?.value  ||s.singer) .trim().toUpperCase();
+  s.song       =(document.getElementById(`ed_song_${i}`)  ?.value  ||s.song)   .trim().toUpperCase();
+  s.singingType= document.getElementById(`ed_type_${i}`)  ?.value  ||s.singingType;
+  const pEl    = document.getElementById(`ed_partner_${i}`);
+  s.duetPartner= (pEl&&pEl.tagName==='SELECT') ? pEl.value.toUpperCase() : (s.singingType==='DUET'?s.duetPartner:'');
+  const minEl  = document.getElementById(`ed_min_${i}`);
+  if(minEl) s.avgMin = parseInt(minEl.value)||s.avgMin;
+  editingIndex=-1;
+  if(isSingerViolating(s.singer)) toast(violationMessage(s.singer));
+  render();
+}
+
+/* quick inline edits (view mode dropdowns) */
+function quickEditType(i,v){
+  playlist[i].singingType=v;
+  if(v!=='DUET') playlist[i].duetPartner='';
+  if(isSingerViolating(playlist[i].singer)) toast(violationMessage(playlist[i].singer));
+  render();
+}
+function quickEditPartner(i,v){ playlist[i].duetPartner=v.toUpperCase(); }
+function edit(i,f,v){ playlist[i][f]=v.toUpperCase(); if(f==='singer') render(); }
+
+/* ═══════════════════════════════════════════════════════════════════
+   ROW OPERATIONS
+═══════════════════════════════════════════════════════════════════ */
+function duplicateRow(i){
+  const d={...playlist[i],status:'PENDING',presence:'PRESENT'};
+  playlist.splice(i+1,0,d);
+  if(isSingerViolating(d.singer)) toast(violationMessage(d.singer));
+  render();
+}
+function toggleHighlight(i,e){ if(e)e.stopPropagation(); currentHighlightedIndex=(currentHighlightedIndex===i)?-1:i; render(); }
+function move(i,d,e){
+  if(e)e.stopPropagation();
+  const t=i+d;
+  if(t<0||t>=playlist.length)return;
+  [playlist[i],playlist[t]]=[playlist[t],playlist[i]];
+  if(currentHighlightedIndex===i)currentHighlightedIndex=t;
+  if(editingIndex===i)editingIndex=t;
+  render();
+}
+function detachFile(i)       {playlist[i].fileName='';playlist[i].fileURL='';render();}
+function replaceFile(i,file) {if(file){playlist[i].fileName=file.name.toUpperCase();playlist[i].fileURL=URL.createObjectURL(file);render();}}
+function toggleStatus(i)     {playlist[i].status   =playlist[i].status   ==='PENDING'?'SUNG'   :'PENDING';render();}
+function togglePresence(i)   {playlist[i].presence =playlist[i].presence ==='PRESENT'?'ABSENT' :'PRESENT';render();}
+function deleteRow(i)        {if(editingIndex===i)editingIndex=-1;playlist.splice(i,1);render();}
+
+/* ═══════════════════════════════════════════════════════════════════
+   PLAYER MODAL  (with Tempo & Pitch via Web Audio API)
+═══════════════════════════════════════════════════════════════════ */
+let _audioCtx=null, _sourceNode=null, _gainNode=null;
+
+function openPlayer(i){
+  const s=playlist[i];
+  if(!s.fileURL){toast('No file attached.');return;}
+  document.getElementById('pm-singer').textContent = s.singer;
+  document.getElementById('pm-song')  .textContent = s.song + (s.duetPartner?` ♦ ${s.duetPartner}`:'');
+  const wrap=document.getElementById('playerMediaWrap');
+  wrap.innerHTML='';
+  const isVid=s.fileName.toLowerCase().endsWith('.mp4')||s.fileName.toLowerCase().endsWith('.webm');
+  const el=document.createElement(isVid?'video':'audio');
+  el.src=s.fileURL; el.controls=true; el.id='pmMedia';
+  if(isVid)el.style.maxHeight='220px';
+  wrap.appendChild(el);
+  _pmMedia=el;
+  // reset controls
+  document.getElementById('tempoSlider').value=1;
+  document.getElementById('pitchSlider').value=0;
+  document.getElementById('tempoVal').textContent='1.00×';
+  document.getElementById('pitchVal').textContent='±0 st';
+  document.getElementById('playerModal').classList.add('open');
+  el.play().catch(()=>{});
+}
+
+function applyTempo(v){
+  const el=document.getElementById('pmMedia');
+  if(el) el.playbackRate=parseFloat(v);
+  document.getElementById('tempoVal').textContent=parseFloat(v).toFixed(2)+'×';
+}
+
+function applyPitch(v){
+  document.getElementById('pitchVal').textContent=(v>=0?'+':'')+v+' st';
+  // Pitch shift via detune on a Web Audio source
+  const el=document.getElementById('pmMedia');
+  if(!el)return;
+  const semitones=parseInt(v);
+  if(!_audioCtx){
+    try{
+      _audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+      const src=_audioCtx.createMediaElementSource(el);
+      _gainNode=_audioCtx.createGain();
+      src.connect(_gainNode);
+      _gainNode.connect(_audioCtx.destination);
+      _sourceNode=src;
+    }catch(e){ return; }
+  }
+  // detune is in cents (100 cents = 1 semitone)
+  if(_sourceNode && _sourceNode.detune!==undefined){
+    _sourceNode.detune.value=semitones*100;
+  }
+}
+
+function pmPlay()  { document.getElementById('pmMedia')?.play(); }
+function pmPause() { document.getElementById('pmMedia')?.pause(); }
+function pmStop()  { const m=document.getElementById('pmMedia'); if(m){m.pause();m.currentTime=0;} }
+function pmReset() {
+  pmStop();
+  document.getElementById('tempoSlider').value=1; applyTempo(1);
+  document.getElementById('pitchSlider').value=0; applyPitch(0);
+}
+function closePlayer(){
+  pmStop();
+  _audioCtx=null; _sourceNode=null; _gainNode=null;
+  document.getElementById('playerModal').classList.remove('open');
+  document.getElementById('playerMediaWrap').innerHTML='';
+}
+// Close on backdrop click
+document.getElementById('playerModal').addEventListener('click',function(e){
+  if(e.target===this)closePlayer();
+});
+
+/* ═══════════════════════════════════════════════════════════════════
+   TIMER
+═══════════════════════════════════════════════════════════════════ */
+function startCountdown(){
+  if(isTimerPaused&&remainingSecs>0){isTimerPaused=false;}
+  else{remainingSecs=(+document.getElementById('pDurH').value*3600)+(+document.getElementById('pDurM').value*60);}
+  clearInterval(timerInterval);
+  timerInterval=setInterval(()=>{if(remainingSecs<=0){stopCountdown();return;}remainingSecs--;updateTimerDisplay();},1000);
+}
+function stopCountdown() {clearInterval(timerInterval);remainingSecs=0;isTimerPaused=false;updateTimerDisplay();}
+function pauseCountdown(){clearInterval(timerInterval);isTimerPaused=true;}
+function resetCountdown(){stopCountdown();remainingSecs=(+document.getElementById('pDurH').value*3600)+(+document.getElementById('pDurM').value*60);updateTimerDisplay();}
+function updateTimerDisplay(){
+  const h=Math.floor(remainingSecs/3600).toString().padStart(2,'0');
+  const m=Math.floor((remainingSecs%3600)/60).toString().padStart(2,'0');
+  const sec=(remainingSecs%60).toString().padStart(2,'0');
+  document.getElementById('progTimer').innerText=`${h}:${m}:${sec}`;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   COUNTERS
+═══════════════════════════════════════════════════════════════════ */
+function updateCounters(){
+  const total=playlist.length;
+  const sung =playlist.filter(s=>s.status==='SUNG').length;
+  let mins=0; playlist.forEach(s=>{if(s.status==='PENDING')mins+=parseInt(s.avgMin||0);});
+  document.getElementById('totalSongs')   .innerText=total;
+  document.getElementById('playedSongs')  .innerText=sung;
+  document.getElementById('pendingSongs') .innerText=total-sung;
+  document.getElementById('totalSingTime').innerText=Math.floor(mins/60)+'H '+(mins%60)+'M';
+  const brk=parseInt(document.getElementById('breakTime').value)||0;
+  document.getElementById('grandTotalTime').innerText=Math.floor((mins+brk)/60)+'H '+((mins+brk)%60)+'M';
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   IMPORT / EXPORT
+═══════════════════════════════════════════════════════════════════ */
+function exportList(){
+  const blob=new Blob([JSON.stringify(playlist.map(s=>({...s,fileURL:''})))],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`Playlist_${document.getElementById('programName').value}.json`;
+  a.click();
+}
+function importList(input){
+  const f=input.files[0]; if(!f)return;
+  const r=new FileReader();
+  r.onload=e=>{try{playlist=JSON.parse(e.target.result);render();}catch{alert('Invalid file format');}};
+  r.readAsText(f);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   UTILITY
+═══════════════════════════════════════════════════════════════════ */
+function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+</script>
+
+
+</body></html>
