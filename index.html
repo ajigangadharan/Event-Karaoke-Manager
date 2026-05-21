@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>KARAOKE MANAGER PRO - PLAYER-V2.0-26-018-FIXED</title>
+    <style>
+        :root { --accent: #3df576; --bg: #050505; --panel: #111; --danger: #ff4757; --info: #2980b9; --highlight: rgba(255, 255, 150, 0.4); }
+        body { background: var(--bg); color: #e0e0e0; font-family: 'Segoe UI', sans-serif; margin: 15px; font-size: 11px; }
+        
+        .main-title { text-align: center; color: var(--accent); font-size: 28px; font-weight: bold; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 2px; }
+
+        input, select, [contenteditable="true"] { text-transform: uppercase !important; font-weight: bold; font-size: 13px !important; }
+
+        .setup-bar { background: #0f0f0f; padding: 12px; border-radius: 12px; border: 1px solid #222; margin-bottom: 10px; display: flex; align-items: center; gap: 15px; }
+        .header-input { flex-grow: 1; color: var(--accent); background: #000; border: 1px solid #333; padding: 8px; border-radius: 6px; }
+
+        .timing-dashboard { flex: 3; background: #000; padding: 8px 12px; border-radius: 8px; border: 1px solid #333; display: flex; align-items: center; gap: 15px; justify-content: space-between; }
+        .time-stat { text-align: center; padding: 0 5px; border-right: 1px solid #222; }
+        .time-stat:last-of-type { border-right: none; }
+        .time-stat label { font-size: 8px; color: #777; display: block; margin-bottom: 2px; font-weight: bold; }
+        .time-stat span { color: var(--accent); }
+        .digital-clock { font-family: 'Courier New', monospace; font-size: 24px !important; color: var(--danger); text-shadow: 0 0 5px var(--danger); min-width: 120px; }
+
+        .btn-stack { display: flex; flex-direction: column; gap: 2px; min-width: 90px; }
+        .timer-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
+
+        .input-group { background: var(--panel); padding: 12px; border-radius: 10px; border: 1px solid #333; display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 8px; margin-bottom: 10px; align-items: end; }
+        .control-block { display: flex; flex-direction: column; gap: 4px; }
+        label { font-size: 9px; color: #777; font-weight: bold; text-transform: uppercase; }
+
+        .table-container { width: 100%; overflow-x: auto; background: var(--panel); border-radius: 8px; border: 1px solid #222; }
+        table { width: 100%; border-collapse: collapse; min-width: 1450px; table-layout: fixed; }
+        th, td { padding: 6px; border: 1px solid #282828; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; }
+        th { background: #1a1a1a; color: var(--accent); font-size: 9px; text-transform: uppercase; }
+
+        .w-id { width: 25px; } .w-name { width: 130px; } .w-song { width: 150px; } .w-sel { width: 100px; } 
+        .w-stat { width: 80px; } .w-file { width: 260px; } .w-ord { width: 60px; } .w-act { width: 140px; } .w-time { width: 70px; }
+
+        /* Modified Highlight to light yellow with opacity */
+        .row-moving { background-color: var(--highlight) !important; transition: background-color 0.2s; cursor: move; }
+
+        .btn { padding: 4px 8px; cursor: pointer; background: #222; color: #fff; border: 1px solid #444; border-radius: 4px; font-weight: bold; font-size: 9px; }
+        .btn-add { background: var(--accent); color: #000; border: none; height: 35px; }
+        .btn-attach { background: #444; color: #fff; border: 1px dashed var(--accent); height: 35px; }
+        .btn-duplicate { background: #ffc107; color: #000; border: none; }
+        .toggle-btn { border: none; padding: 3px; border-radius: 4px; font-weight: bold; cursor: pointer; width: 100%; font-size: 9px; }
+        
+        .status-pending { background: #e6b800; color: #000; }
+        .status-sung { background: var(--accent); color: #000; }
+        .presence-present { background: var(--info); color: #fff; }
+        .presence-absent { background: var(--danger); color: #fff; }
+
+        .counter-container { margin: 5px 0; padding: 8px; background: #111; border-radius: 6px; display: flex; gap: 20px; align-items: center; }
+        .counter-container b { color: var(--accent); font-size: 14px; }
+        
+        .file-cell-wrap { display: flex; align-items: center; justify-content: space-between; gap: 5px; }
+        .file-name-text { font-size: 9px; color: var(--accent); font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; }
+    </style>
+</head>
+<body onload="initApp()">
+
+    <div class="main-title">SINGING SHOW MANAGER</div>
+
+    <div class="setup-bar">
+        <div class="name-area" style="flex:2; display:flex; gap:10px; align-items: center;">
+            <input type="text" id="programName" class="header-input" value="KARAOKE_MASTER_EVENT">
+            <input type="date" id="pDate" style="width:130px;" value="2026-01-27">
+            <button class="btn" onclick="saveProgramSettings()" style="background:var(--accent); color:#000; height:35px;">SAVE SETTINGS</button>
+        </div>
+        <div class="timing-dashboard">
+            <div class="time-stat"><label>DURATION</label><div style="display:flex;"><input type="number" id="pDurH" value="3" style="width:25px; border:none; background:transparent; color:var(--accent)">:<input type="number" id="pDurM" value="0" style="width:25px; border:none; background:transparent; color:var(--accent)"></div></div>
+            <div class="time-stat"><label>SINGING</label><span id="totalSingTime">0H 0M</span></div>
+            <div class="time-stat"><label>BREAK</label><input type="number" id="breakTime" value="15" style="width:30px; border:none; background:transparent; color:var(--accent)" oninput="updateCounters()"></div>
+            <div class="time-stat"><label>TOTAL</label><span id="grandTotalTime" style="color:var(--info)">0H 0M</span></div>
+            <div class="time-stat"><label>TIMER</label><div id="progTimer" class="digital-clock">03:00:00</div></div>
+            <div class="btn-stack">
+                <div class="timer-controls">
+                    <button class="btn" onclick="startCountdown()" style="background:var(--info)">START</button>
+                    <button class="btn" onclick="pauseCountdown()">PAUSE</button>
+                    <button class="btn" onclick="stopCountdown()" style="background:var(--danger)">STOP</button>
+                    <button class="btn" onclick="resetCountdown()">RESET</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="input-group">
+        <div class="control-block"><label>Singer</label><input id="singerName" type="text"></div>
+        <div class="control-block"><label>Song</label><input id="songName" type="text"></div>
+        <div class="control-block"><label>Language</label><select id="languageSelect"></select></div>
+        <div class="control-block"><label>Type</label><select id="singingType"></select></div>
+        <div class="control-block"><label>Playback</label><select id="playbackSource"></select></div>
+        <div class="control-block"><label>Format</label><select id="fileType"></select></div>
+        <div class="control-block">
+            <label>Attach File</label>
+            <button class="btn btn-attach" id="attachBtn" onclick="document.getElementById('fileInput').click()">ATTACH FILE</button>
+            <input type="file" id="fileInput" style="display:none" onchange="updateAttachLabel(this)">
+        </div>
+        <button class="btn btn-add" onclick="addSong()">ADD SINGER</button>
+    </div>
+
+    <div class="counter-container">
+        <span>TOTAL: <b id="totalSongs">0</b></span>
+        <span>PLAYED (SUNG): <b id="playedSongs">0</b></span>
+        <span>PENDING: <b id="pendingSongs">0</b></span>
+        <div style="margin-left: auto; display: flex; gap: 5px;">
+            <button class="btn" onclick="exportList()" style="background:var(--accent); color:#000;">SAVE LIST (JSON)</button>
+            <button class="btn" onclick="document.getElementById('importListFile').click()">LOAD LIST</button>
+            <input type="file" id="importListFile" style="display:none" accept=".json" onchange="importList(this)">
+            <button class="btn" onclick="saveAsHTML()" style="background:var(--info)">DOWNLOAD HTML</button>
+        </div>
+    </div>
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th class="w-id">#</th><th class="w-name">SINGER</th><th class="w-song">SONG</th><th class="w-sel">LANG</th><th class="w-sel">TYPE</th><th class="w-stat">STATUS</th><th class="w-stat">PRES</th><th class="w-sel">PLAYBACK</th><th class="w-sel">FORMAT</th><th class="w-file">FILE / ACTION</th><th class="w-time">MINS</th><th class="w-ord">MOVE</th><th class="w-act">ACTION</th>
+                </tr>
+            </thead>
+            <tbody id="pBody"></tbody>
+        </table>
+    </div>
+
+<script>
+let playlist = [];
+let timerInterval;
+let remainingSecs = 0;
+let isTimerPaused = false;
+let activePlayer = null;
+let currentHighlightedIndex = -1; 
+
+const opts = {
+    lang: ["MALAYALAM","TAMIL","HINDI","ENGLISH","ARABIC","TELUGU","KANNADA","OTHER"],
+    singing: ["MALE SOLO","FEMALE SOLO","MALE DUET","FEMALE DUET","MIXED DUET","MEDLEY"],
+    playback: ["LOCAL","MOBILE","LAPTOP","ONLINE"],
+    file: ["MP3","WAV","MP4","OTHER"]
+};
+
+let lastEntry = {
+    singer: '', song: '', language: opts.lang[0], singingType: opts.singing[0], playback: opts.playback[0], fileType: opts.file[0]
+};
+
+function initApp() {
+    populateAddDropdowns();
+    loadSession();
+    loadProgramSettings();
+}
+
+function populateAddDropdowns() {
+    document.getElementById('languageSelect').innerHTML = opts.lang.map(o => `<option value="${o}">${o}</option>`).join('');
+    document.getElementById('singingType').innerHTML = opts.singing.map(o => `<option value="${o}">${o}</option>`).join('');
+    document.getElementById('playbackSource').innerHTML = opts.playback.map(o => `<option value="${o}">${o}</option>`).join('');
+    document.getElementById('fileType').innerHTML = opts.file.map(o => `<option value="${o}">${o}</option>`).join('');
+}
+
+function saveProgramSettings() {
+    const settings = {
+        name: document.getElementById('programName').value,
+        date: document.getElementById('pDate').value, durH: document.getElementById('pDurH').value,
+        durM: document.getElementById('pDurM').value, break: document.getElementById('breakTime').value
+    };
+    localStorage.setItem('karaoke_program_settings', JSON.stringify(settings));
+    alert("Settings Saved Successfully!");
+}
+
+function loadProgramSettings() {
+    const stored = localStorage.getItem('karaoke_program_settings');
+    if (stored) {
+        const s = JSON.parse(stored);
+        document.getElementById('programName').value = s.name || "KARAOKE_MASTER_EVENT";
+        document.getElementById('pDate').value = s.date || "2026-01-27";
+        document.getElementById('pDurH').value = s.durH || "3";
+        document.getElementById('pDurM').value = s.durM || "0";
+        document.getElementById('breakTime').value = s.break || "15";
+        updateCounters(); resetCountdown();
+    }
+}
+
+function loadSession() {
+    const stored = localStorage.getItem('karaoke_v2_26_018');
+    if (stored) { try { playlist = JSON.parse(stored); render(); } catch(e) { playlist = []; } }
+    const storedLastEntry = localStorage.getItem('karaoke_last_entry');
+    if (storedLastEntry) { try { lastEntry = JSON.parse(storedLastEntry); populateFormWithLastEntry(); } catch(e) {} }
+}
+
+function populateFormWithLastEntry() {
+    document.getElementById('singerName').value = lastEntry.singer || '';
+    document.getElementById('songName').value = lastEntry.song || '';
+    document.getElementById('languageSelect').value = lastEntry.language || opts.lang[0];
+    document.getElementById('singingType').value = lastEntry.singingType || opts.singing[0];
+    document.getElementById('playbackSource').value = lastEntry.playback || opts.playback[0];
+    document.getElementById('fileType').value = lastEntry.fileType || opts.file[0];
+}
+
+function updateAttachLabel(input) { if (input.files && input.files[0]) { document.getElementById('attachBtn').innerText = input.files[0].name.toUpperCase(); } }
+
+function addSong() {
+    const singer = document.getElementById('singerName').value.trim().toUpperCase();
+    const song = document.getElementById('songName').value.trim().toUpperCase();
+    if (!singer || !song) { alert("Singer and Song are required!"); return; }
+    const fileInput = document.getElementById('fileInput');
+    const newEntry = {
+        singer: singer, song: song, language: document.getElementById('languageSelect').value,
+        singingType: document.getElementById('singingType').value, status: "PENDING", presence: "PRESENT",
+        playback: document.getElementById('playbackSource').value, fileType: document.getElementById('fileType').value,
+        fileName: "", fileURL: "", avgMin: 5
+    };
+    if (fileInput.files && fileInput.files[0]) {
+        newEntry.fileName = fileInput.files[0].name.toUpperCase();
+        newEntry.fileURL = URL.createObjectURL(fileInput.files[0]);
+    }
+    playlist.push(newEntry);
+    lastEntry = { singer, song, language: newEntry.language, singingType: newEntry.singingType, playback: newEntry.playback, fileType: newEntry.fileType };
+    localStorage.setItem('karaoke_last_entry', JSON.stringify(lastEntry));
+    document.getElementById('attachBtn').innerText = 'ATTACH FILE';
+    fileInput.value = '';
+    saveSession(); render();
+}
+
+function duplicateRow(i) {
+    const original = playlist[i];
+    const duplicate = { ...original, status: "PENDING", presence: "PRESENT" };
+    playlist.splice(i + 1, 0, duplicate);
+    saveSession(); render();
+}
+
+function render() {
+    const body = document.getElementById('pBody');
+    body.innerHTML = '';
+    playlist.forEach((s, i) => {
+        const hasFile = s.fileURL && s.fileURL.trim() !== "";
+        const highlightClass = (i === currentHighlightedIndex) ? 'row-moving' : '';
+        const fileDisplay = hasFile 
+            ? `<div class="file-cell-wrap"><div class="file-name-text">${s.fileName}</div><button class="btn" onclick="detachFile(${i})" style="background:var(--danger);">DETACH FILE</button></div>` 
+            : `<div class="file-cell-wrap"><button class="btn btn-attach" onclick="document.getElementById('fileReplace${i}').click()" style="width:100%;">ATTACH FILE</button><input type="file" id="fileReplace${i}" onchange="replaceFile(${i},this.files[0])" style="display:none;"></div>`;
+
+        body.innerHTML += `
+        <tr class="${highlightClass}" ondblclick="toggleHighlight(${i}, event)">
+            <td>${i+1}</td>
+            <td contenteditable="true" onblur="edit(${i},'singer',this.innerText)">${s.singer}</td>
+            <td contenteditable="true" onblur="edit(${i},'song',this.innerText)">${s.song}</td>
+            <td><select onchange="edit(${i},'language',this.value)">${opts.lang.map(o=>`<option ${o===s.language?'selected':''}>${o}</option>`).join('')}</select></td>
+            <td><select onchange="edit(${i},'singingType',this.value)">${opts.singing.map(o=>`<option ${o===s.singingType?'selected':''}>${o}</option>`).join('')}</select></td>
+            <td><button class="toggle-btn status-${s.status.toLowerCase()}" onclick="toggleStatus(${i})">${s.status}</button></td>
+            <td><button class="toggle-btn presence-${s.presence.toLowerCase()}" onclick="togglePresence(${i})">${s.presence}</button></td>
+            <td><select onchange="edit(${i},'playback',this.value)">${opts.playback.map(o=>`<option ${o===s.playback?'selected':''}>${o}</option>`).join('')}</select></td>
+            <td><select onchange="edit(${i},'fileType',this.value)">${opts.file.map(o=>`<option ${o===s.fileType?'selected':''}>${o}</option>`).join('')}</select></td>
+            <td>${fileDisplay}</td>
+            <td contenteditable="true" onblur="edit(${i},'avgMin',this.innerText)">${s.avgMin}</td>
+            <td>
+                <button class="btn" onclick="move(${i},-1, event)">▲</button>
+                <button class="btn" onclick="move(${i},1, event)">▼</button>
+            </td>
+            <td>
+                <button class="btn" style="background:${hasFile?'#fff':'#333'}; color:${hasFile?'#000':'#666'};" onclick="playTrack(${i})" ${!hasFile?'disabled':''}>PLAY</button>
+                <button class="btn btn-duplicate" onclick="duplicateRow(${i})">DUP</button>
+                <button class="btn" onclick="deleteRow(${i})">X</button>
+            </td>
+        </tr>`;
+    });
+    updateCounters();
+}
+
+// Function to handle double click on the row
+function toggleHighlight(i, e) {
+    // If double clicked row is already highlighted, turn it off
+    if (currentHighlightedIndex === i) {
+        currentHighlightedIndex = -1;
+    } else {
+        currentHighlightedIndex = i;
+    }
+    render();
+}
+
+function move(i, d, e) { 
+    // Prevent the row dblclick event when clicking move buttons
+    if(e) e.stopPropagation();
+    
+    let t = i+d; 
+    if(t>=0 && t<playlist.length) { 
+        [playlist[i], playlist[t]] = [playlist[t], playlist[i]]; 
+        // Move the highlight with the row
+        if (currentHighlightedIndex === i) currentHighlightedIndex = t;
+        saveSession(); 
+        render(); 
+    } 
+}
+
+function detachFile(i) { playlist[i].fileName = ""; playlist[i].fileURL = ""; saveSession(); render(); }
+function replaceFile(i, file) { if(file) { playlist[i].fileName = file.name.toUpperCase(); playlist[i].fileURL = URL.createObjectURL(file); saveSession(); render(); } }
+function toggleStatus(i) { playlist[i].status = (playlist[i].status === "PENDING" ? "SUNG" : "PENDING"); saveSession(); render(); }
+function togglePresence(i) { playlist[i].presence = (playlist[i].presence === "PRESENT" ? "ABSENT" : "PRESENT"); saveSession(); render(); }
+
+function startCountdown() {
+    if (isTimerPaused && remainingSecs > 0) { isTimerPaused = false; } 
+    else { remainingSecs = (parseInt(document.getElementById('pDurH').value) * 3600) + (parseInt(document.getElementById('pDurM').value) * 60); }
+    clearInterval(timerInterval);
+    timerInterval = setInterval(() => { if (remainingSecs <= 0) { stopCountdown(); return; } remainingSecs--; updateTimerDisplay(); }, 1000);
+}
+function stopCountdown() { clearInterval(timerInterval); remainingSecs = 0; isTimerPaused = false; updateTimerDisplay(); }
+function pauseCountdown() { clearInterval(timerInterval); isTimerPaused = true; }
+function resetCountdown() { stopCountdown(); remainingSecs = (parseInt(document.getElementById('pDurH').value) * 3600) + (parseInt(document.getElementById('pDurM').value) * 60); updateTimerDisplay(); }
+function updateTimerDisplay() {
+    const h = Math.floor(remainingSecs / 3600).toString().padStart(2, '0');
+    const m = Math.floor((remainingSecs % 3600) / 60).toString().padStart(2, '0');
+    const s = (remainingSecs % 60).toString().padStart(2, '0');
+    document.getElementById('progTimer').innerText = `${h}:${m}:${s}`;
+}
+
+function updateCounters() {
+    const total = playlist.length;
+    const sung = playlist.filter(s => s.status === "SUNG").length;
+    let singMins = 0; playlist.forEach(s => { if(s.status === "PENDING") singMins += parseInt(s.avgMin || 0); });
+    document.getElementById("totalSongs").innerText = total;
+    document.getElementById("playedSongs").innerText = sung;
+    document.getElementById("pendingSongs").innerText = total - sung;
+    document.getElementById("totalSingTime").innerText = Math.floor(singMins/60) + "H " + (singMins%60) + "M";
+    document.getElementById("grandTotalTime").innerText = Math.floor((singMins+(parseInt(document.getElementById('breakTime').value)||0))/60) + "H " + ((singMins+(parseInt(document.getElementById('breakTime').value)||0))%60) + "M";
+}
+
+function exportList() {
+    const data = JSON.stringify(playlist.map(s => ({...s, fileURL: ''})));
+    const blob = new Blob([data], {type: 'application/json'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `Playlist_${document.getElementById('programName').value}.json`;
+    a.click();
+}
+
+function importList(input) {
+    const file = input.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => { try { playlist = JSON.parse(e.target.result); render(); saveSession(); } catch (err) { alert("Invalid File Format"); } };
+    reader.readAsText(file);
+}
+
+function playTrack(i) {
+    if (activePlayer && !activePlayer.closed) { alert("A track is currently playing. Close the active player window first."); activePlayer.focus(); return; }
+    const s = playlist[i];
+    activePlayer = window.open("", "Player", `width=600,height=500`);
+    activePlayer.document.write(`<body style="background:#000; color:#fff; font-family:sans-serif; text-align:center; padding:20px; border:5px solid #3df576;"><h1 style="color:#3df576;">${s.singer}</h1><p>${s.song}</p><div style="margin:20px 0;">${s.fileName.toLowerCase().endsWith('.mp4') ? `<video id="m" src="${s.fileURL}" style="max-width:100%;"></video>` : `<audio id="m" src="${s.fileURL}" style="width:90%;"></audio>`}</div><button onclick="document.getElementById('m').play()" style="padding:10px 20px; background:#3df576; border:none; border-radius:5px; font-weight:bold;">PLAY</button> <button onclick="window.close()" style="padding:10px 20px; background:#222; color:#fff; border:1px solid #444; border-radius:5px;">CLOSE</button><script>window.onload=()=>{document.getElementById('m').play();}<\/script></body>`);
+}
+
+function edit(i, f, v) { playlist[i][f] = v.toUpperCase(); saveSession(); }
+function deleteRow(i) { playlist.splice(i, 1); saveSession(); render(); }
+function saveSession() { localStorage.setItem('karaoke_v2_26_018', JSON.stringify(playlist.map(s => ({...s, fileURL: ''})))); }
+function saveAsHTML() {
+    const blob = new Blob([document.documentElement.outerHTML], {type: 'text/html'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `MASTER_PLAYER-V2.0-26-018.html`;
+    a.click();
+}
+</script>
+</body>
+</html>
