@@ -1,4 +1,6 @@
-<html lang="en"><head>
+<!DOCTYPE html>
+<html lang="en">
+<head>
 <meta charset="UTF-8">
 <title>KARAOKE MANAGER PRO - PLAYER-V2.0-26-025-V13</title>
 <style>
@@ -99,13 +101,13 @@ th{background:#1a1a1a;color:var(--accent);font-size:8px;text-transform:uppercase
 <body onload="initApp()">
 
 <!-- Toast -->
-<div id="toastBox" style="background: var(--danger); display: none; animation: 0.4s ease 0s 1 normal forwards running toastOut;">"AJI" has 3 solo songs (max 2).</div>
+<div id="toastBox"></div>
 
 <!-- Player Modal -->
 <div id="playerModal">
   <div id="playerBox">
     <h2 id="pm-singer">—</h2>
-    <p id="pm-song">—</p>
+    <p  id="pm-song">—</p>
     <div id="playerMediaWrap"></div>
     <div class="player-controls">
       <div class="ctrl-row">
@@ -138,8 +140,8 @@ th{background:#1a1a1a;color:var(--accent);font-size:8px;text-transform:uppercase
 <!-- Cloud / Multi-user sync panel -->
 <div id="cloudPanel">
   <span style="color:#777;font-size:9px;font-weight:bold;">☁ SHARED DATA (JSONBIN):</span>
-  <input id="binId" type="text" placeholder="BIN ID (e.g. 6629…)" style="width:180px;background:#111;border:1px solid #333;color:#ccc;padding:4px 6px;border-radius:4px;font-size:10px;">
-  <input id="binKey" type="password" placeholder="MASTER KEY" style="width:180px;background:#111;border:1px solid #333;color:#ccc;padding:4px 6px;border-radius:4px;font-size:10px;">
+  <input id="binId"  type="text" placeholder="BIN ID (e.g. 6629…)"  style="width:180px;background:#111;border:1px solid #333;color:#ccc;padding:4px 6px;border-radius:4px;font-size:10px;">
+  <input id="binKey" type="password" placeholder="MASTER KEY"        style="width:180px;background:#111;border:1px solid #333;color:#ccc;padding:4px 6px;border-radius:4px;font-size:10px;">
   <button class="btn" onclick="cloudPush()" style="background:var(--info);">⬆ PUSH</button>
   <button class="btn" onclick="cloudPull()" style="background:#2a5a2a;color:var(--accent);">⬇ PULL</button>
   <button class="btn" onclick="cloudCreateBin()" style="background:#333;">＋ CREATE BIN</button>
@@ -156,9 +158,9 @@ th{background:#1a1a1a;color:var(--accent);font-size:8px;text-transform:uppercase
   </div>
   <div class="timing-dashboard">
     <div class="time-stat"><label>DURATION</label><div style="display:flex;align-items:center;"><input type="number" id="pDurH" value="3" style="width:24px;border:none;background:transparent;color:var(--accent)">:<input type="number" id="pDurM" value="0" style="width:24px;border:none;background:transparent;color:var(--accent)"></div></div>
-    <div class="time-stat"><label>SINGING</label><span id="totalSingTime">0H 15M</span></div>
+    <div class="time-stat"><label>SINGING</label><span id="totalSingTime">0H 0M</span></div>
     <div class="time-stat"><label>BREAK</label><input type="number" id="breakTime" value="15" style="width:28px;border:none;background:transparent;color:var(--accent)" oninput="updateCounters()"></div>
-    <div class="time-stat"><label>TOTAL</label><span id="grandTotalTime" style="color:var(--info)">0H 30M</span></div>
+    <div class="time-stat"><label>TOTAL</label><span id="grandTotalTime" style="color:var(--info)">0H 0M</span></div>
     <div class="time-stat"><label>TIMER</label><div id="progTimer" class="digital-clock">03:00:00</div></div>
     <div class="btn-stack"><div class="timer-controls">
       <button class="btn" onclick="startCountdown()" style="background:var(--info)">START</button>
@@ -173,13 +175,13 @@ th{background:#1a1a1a;color:var(--accent);font-size:8px;text-transform:uppercase
 <div class="input-group">
   <div class="control-block wide"><label>Singer</label><input id="singerName" type="text"></div>
   <div class="control-block wide"><label>Song</label><input id="songName" type="text"></div>
-  <div class="control-block"><label>Type</label><select id="singingType" onchange="onTypeChange()"><option>SOLO</option><option>DUET</option><option>MEDLEY</option></select></div>
+  <div class="control-block"><label>Type</label><select id="singingType" onchange="onTypeChange()"></select></div>
   <div class="control-block wide" id="duetPartnerBlock">
     <label>Duet Partner</label>
-    <select id="duetPartner"><option value="">— SELECT PARTNER —</option><option value="AJI">AJI</option></select>
+    <select id="duetPartner"><option value="">— SELECT PARTNER —</option></select>
   </div>
-  <div class="control-block"><label>Playback</label><select id="playbackSource"><option>LOCAL</option><option>MOBILE</option><option>LAPTOP</option><option>ONLINE</option></select></div>
-  <div class="control-block"><label>Format</label><select id="fileType"><option>MP3</option><option>WAV</option><option>MP4</option><option>OTHER</option></select></div>
+  <div class="control-block"><label>Playback</label><select id="playbackSource"></select></div>
+  <div class="control-block"><label>Format</label><select id="fileType"></select></div>
   <div class="control-block">
     <label>Attach File</label>
     <button class="btn btn-attach" id="attachBtn" onclick="document.getElementById('fileInput').click()">ATTACH FILE</button>
@@ -190,9 +192,9 @@ th{background:#1a1a1a;color:var(--accent);font-size:8px;text-transform:uppercase
 
 <!-- Counter bar -->
 <div class="counter-container">
-  <span>TOTAL: <b id="totalSongs">3</b></span>
+  <span>TOTAL: <b id="totalSongs">0</b></span>
   <span>PLAYED: <b id="playedSongs">0</b></span>
-  <span>PENDING: <b id="pendingSongs">3</b></span>
+  <span>PENDING: <b id="pendingSongs">0</b></span>
   <div style="margin-left:auto;display:flex;gap:5px;flex-wrap:wrap;">
     <button class="btn" onclick="exportList()" style="background:var(--accent);color:#000;">SAVE LIST (JSON)</button>
     <button class="btn" onclick="document.getElementById('importListFile').click()">LOAD LIST</button>
@@ -218,126 +220,13 @@ th{background:#1a1a1a;color:var(--accent);font-size:8px;text-transform:uppercase
     <th class="w-ord">MOVE</th>
     <th class="w-act">ACTIONS</th>
   </tr></thead>
-  <tbody id="pBody">
-    <tr class="" ondblclick="toggleHighlight(0,event)">
-      <td>1</td>
-      <td><span class="singer-warn">AJI</span></td>
-      <td>QWER</td>
-      <td><select onchange="quickEditType(0,this.value)"><option selected="">SOLO</option><option>DUET</option><option>MEDLEY</option></select></td>
-      <td><button class="toggle-btn status-pending" onclick="toggleStatus(0)">PENDING</button></td>
-      <td><button class="toggle-btn presence-present" onclick="togglePresence(0)">PRESENT</button></td>
-      <td><select onchange="edit(0,'playback',this.value)"><option selected="">LOCAL</option><option>MOBILE</option><option>LAPTOP</option><option>ONLINE</option></select></td>
-      <td><select onchange="edit(0,'fileType',this.value)"><option selected="">MP3</option><option>WAV</option><option>MP4</option><option>OTHER</option></select></td>
-      <td><div class="file-cell-wrap"><button class="btn btn-attach" onclick="document.getElementById('fr0').click()" style="width:100%;font-size:8px;">ATTACH</button><input type="file" id="fr0" onchange="replaceFile(0,this.files[0])" style="display:none;"></div></td>
-      <td>5</td>
-      <td>
-        <button class="btn" onclick="move(0,-1,event)" style="padding:3px 5px;">▲</button>
-        <button class="btn" onclick="move(0,1,event)" style="padding:3px 5px;">▼</button>
-      </td>
-      <td><button class="btn btn-edit" onclick="startEdit(0)">EDIT</button>
-         <button class="btn" style="background:#333;color:#666;" onclick="openPlayer(0)" disabled="">▶</button>
-         <button class="btn btn-duplicate" onclick="duplicateRow(0)">DUP</button>
-         <button class="btn" onclick="deleteRow(0)" style="background:var(--danger);">✕</button></td>
-    </tr>
-    <tr class="" ondblclick="toggleHighlight(1,event)">
-      <td>2</td>
-      <td><span class="singer-warn">AJI</span></td>
-      <td>QWER</td>
-      <td><select onchange="quickEditType(1,this.value)"><option selected="">SOLO</option><option>DUET</option><option>MEDLEY</option></select></td>
-      <td><button class="toggle-btn status-pending" onclick="toggleStatus(1)">PENDING</button></td>
-      <td><button class="toggle-btn presence-present" onclick="togglePresence(1)">PRESENT</button></td>
-      <td><select onchange="edit(1,'playback',this.value)"><option selected="">LOCAL</option><option>MOBILE</option><option>LAPTOP</option><option>ONLINE</option></select></td>
-      <td><select onchange="edit(1,'fileType',this.value)"><option selected="">MP3</option><option>WAV</option><option>MP4</option><option>OTHER</option></select></td>
-      <td><div class="file-cell-wrap"><button class="btn btn-attach" onclick="document.getElementById('fr1').click()" style="width:100%;font-size:8px;">ATTACH</button><input type="file" id="fr1" onchange="replaceFile(1,this.files[0])" style="display:none;"></div></td>
-      <td>5</td>
-      <td>
-        <button class="btn" onclick="move(1,-1,event)" style="padding:3px 5px;">▲</button>
-        <button class="btn" onclick="move(1,1,event)" style="padding:3px 5px;">▼</button>
-      </td>
-      <td><button class="btn btn-edit" onclick="startEdit(1)">EDIT</button>
-         <button class="btn" style="background:#333;color:#666;" onclick="openPlayer(1)" disabled="">▶</button>
-         <button class="btn btn-duplicate" onclick="duplicateRow(1)">DUP</button>
-         <button class="btn" onclick="deleteRow(1)" style="background:var(--danger);">✕</button></td>
-    </tr>
-    <tr class="" ondblclick="toggleHighlight(2,event)">
-      <td>3</td>
-      <td><span class="singer-warn">AJI</span></td>
-      <td>QWER</td>
-      <td><select onchange="quickEditType(2,this.value)"><option selected="">SOLO</option><option>DUET</option><option>MEDLEY</option></select></td>
-      <td><button class="toggle-btn status-pending" onclick="toggleStatus(2)">PENDING</button></td>
-      <td><button class="toggle-btn presence-present" onclick="togglePresence(2)">PRESENT</button></td>
-      <td><select onchange="edit(2,'playback',this.value)"><option selected="">LOCAL</option><option>MOBILE</option><option>LAPTOP</option><option>ONLINE</option></select></td>
-      <td><select onchange="edit(2,'fileType',this.value)"><option selected="">MP3</option><option>WAV</option><option>MP4</option><option>OTHER</option></select></td>
-      <td><div class="file-cell-wrap"><button class="btn btn-attach" onclick="document.getElementById('fr2').click()" style="width:100%;font-size:8px;">ATTACH</button><input type="file" id="fr2" onchange="replaceFile(2,this.files[0])" style="display:none;"></div></td>
-      <td>5</td>
-      <td>
-        <button class="btn" onclick="move(2,-1,event)" style="padding:3px 5px;">▲</button>
-        <button class="btn" onclick="move(2,1,event)" style="padding:3px 5px;">▼</button>
-      </td>
-      <td><button class="btn btn-edit" onclick="startEdit(2)">EDIT</button>
-         <button class="btn" style="background:#333;color:#666;" onclick="openPlayer(2)" disabled="">▶</button>
-         <button class="btn btn-duplicate" onclick="duplicateRow(2)">DUP</button>
-         <button class="btn" onclick="deleteRow(2)" style="background:var(--danger);">✕</button></td>
-    </tr></tbody>
+  <tbody id="pBody"></tbody>
 </table>
 </div>
 
 <!-- Embedded data block — rewritten on every Save/Download -->
 <script id="embeddedData" type="application/json">
-{
-  "playlist": [
-    {
-      "singer": "AJI",
-      "song": "QWER",
-      "singingType": "SOLO",
-      "duetPartner": "",
-      "status": "PENDING",
-      "presence": "PRESENT",
-      "playback": "LOCAL",
-      "fileType": "MP3",
-      "fileName": "",
-      "fileURL": "",
-      "avgMin": 5
-    },
-    {
-      "singer": "AJI",
-      "song": "QWER",
-      "singingType": "SOLO",
-      "duetPartner": "",
-      "status": "PENDING",
-      "presence": "PRESENT",
-      "playback": "LOCAL",
-      "fileType": "MP3",
-      "fileName": "",
-      "fileURL": "",
-      "avgMin": 5
-    },
-    {
-      "singer": "AJI",
-      "song": "QWER",
-      "singingType": "SOLO",
-      "duetPartner": "",
-      "status": "PENDING",
-      "presence": "PRESENT",
-      "playback": "LOCAL",
-      "fileType": "MP3",
-      "fileName": "",
-      "fileURL": "",
-      "avgMin": 5
-    }
-  ],
-  "settings": {
-    "name": "KARAOKE_MASTER_EVENT",
-    "date": "2026-01-27",
-    "durH": "3",
-    "durM": "0",
-    "break": "15"
-  },
-  "cloud": {
-    "binId": "",
-    "binKey": ""
-  }
-}
+{"playlist":[],"settings":{"name":"KARAOKE_MASTER_EVENT","date":"2026-01-27","durH":"3","durM":"0","break":"15"},"cloud":{"binId":"","binKey":""}}
 </script>
 
 <script>
@@ -903,6 +792,5 @@ function importList(input){
 ═══════════════════════════════════════════════════════════════════ */
 function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 </script>
-
-
-</body></html>
+</body>
+</html>
